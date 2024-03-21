@@ -3,13 +3,15 @@ import pygame
 import random
 import numpy as np
 from pygame.locals import *
+from copy import deepcopy
 
 
 width, height = 600,1000
 
-ELASTICITY = 0.95
+ELASTICITY = 1.001
 BALL_RADIUS = 10
 NO_BALLS = 20
+FRICTION = 0.5
 # Definicja kolorów
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -34,75 +36,50 @@ clock = pygame.time.Clock()
 space = pymunk.Space()      # Create a Space which contain the simulation
 space.gravity = 0, 981     # Set its gravity
 
-wall_width = 10
-
-# Floor
-left_floor = pymunk.Body(body_type=pymunk.Body.STATIC)
-left_floor_shape = pymunk.Segment(left_floor, (0, 0.9*height), (width // 2 - BALL_RADIUS*2 - FLIPPER_HOR, 0.99*height - FLIPPER_VERT), wall_width)
-left_floor_shape.friction = 0.5
-left_floor_shape.elasticity = ELASTICITY
-space.add(left_floor, left_floor_shape)
-
-right_floor = pymunk.Body(body_type=pymunk.Body.STATIC)
-right_floor_shape = pymunk.Segment(right_floor, (width, 0.9*height), (width // 2 + BALL_RADIUS*2 + FLIPPER_VERT, 0.99*height - FLIPPER_VERT), wall_width)
-right_floor_shape.friction = 0.5
-right_floor_shape.elasticity = ELASTICITY
-space.add(right_floor, right_floor_shape)
+WALL_WIDTH = 10
 
 
+object_colors = {}
 
-# Ceiling
-ceil = pymunk.Body(body_type=pymunk.Body.STATIC)
-ceil_shape = pymunk.Segment(ceil, (0, wall_width//2), (width, wall_width//2), wall_width)
-ceil_shape.friction = 0.5
-ceil_shape.elasticity = ELASTICITY
-space.add(ceil, ceil_shape)
+def create_wall(start_pos = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), end_pos = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True) :
+    if static :
+        wall = pymunk.Body(body_type=pymunk.Body.STATIC)
+    else : 
+        wall = pymunk.Body()
+    wall_shape = pymunk.Segment(wall, start_pos, end_pos, width)
+    wall_shape.friction = friction
+    wall_shape.elasticity = elasticity
+    object_colors[wall_shape] = color
+    space.add(wall, wall_shape)
+    return wall, wall_shape
 
-
-# Left Wall
-left_wall = pymunk.Body(body_type=pymunk.Body.STATIC)
-left_wall_shape = pymunk.Segment(left_wall, (wall_width//2, 0), (wall_width//2, height), wall_width)
-left_wall_shape.friction = 0.5
-left_wall_shape.elasticity = ELASTICITY
-space.add(left_wall, left_wall_shape)
-
-# Right Wall
-right_wall = pymunk.Body(body_type=pymunk.Body.STATIC)
-right_wall_shape = pymunk.Segment(right_wall, (width - wall_width//2, 0), (width - wall_width//2, height), wall_width)
-right_wall_shape.friction = 0.5
-right_wall_shape.elasticity = ELASTICITY
-space.add(right_wall, right_wall_shape)
+right_wall, right_wall_shape = create_wall(start_pos = (width - WALL_WIDTH//2, 0), end_pos = (width - WALL_WIDTH//2, height),color = WHITE)
+left_wall, left_wall_shape = create_wall(start_pos = (WALL_WIDTH//2, 0), end_pos = (WALL_WIDTH//2, height),color = WHITE)
+ceil, ceil_shape = create_wall(start_pos = (0, WALL_WIDTH//2), end_pos = (width, WALL_WIDTH//2),color = WHITE)
+floor, floor_shape = create_wall(start_pos = (0, height - WALL_WIDTH//2), end_pos = (width, height - WALL_WIDTH//2),color = WHITE)
 
 
-colors = {}
-
-# ball = pymunk.Body()
-# ball.position = 100, int(0.8*height)
-# radius = BALL_RADIUS
-# ball_shape = pymunk.Circle(ball, radius)
-# ball_shape.mass = ball_shape.area
-# colors[ball_shape] = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
-# space.add(ball, ball_shape)
-
-# ball2 = pymunk.Body()
-# ball2.position = 105, 105
-# radius = BALL_RADIUS
-# ball2_shape = pymunk.Circle(ball2, radius)
-# ball2_shape.mass = ball2_shape.area
-# space.add(ball2, ball2_shape)
-
-
+def create_ball(r = BALL_RADIUS, position = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY) :
+    global object_colors, space
+    ball = None
+    if static : ball = pymunk.Body(body_type=pymunk.Body.STATIC)
+    else : ball = pymunk.Body()
+    ball.position = position
+    radius = r
+    ball_shape = pymunk.Circle(ball, radius)
+    if mass is not None :
+        ball_shape.mass = mass
+    else : 
+        ball_shape.mass = ball_shape.area
+    ball_shape.elasticity = elasticity
+    object_colors[ball_shape] = color
+    space.add(ball, ball_shape)
+    return ball,ball_shape
+    
 
 for i in range(NO_BALLS) :
-    ball = pymunk.Body()
-    ball.position = random.randint(10,width-10),random.randint(10,0.9*height-10)
-    radius = BALL_RADIUS
-    ball_shape = pymunk.Circle(ball, radius)
-    ball_shape.mass = ball_shape.area
-    colors[ball_shape] = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
-    space.add(ball, ball_shape)
-
-
+    
+    ball,ball_shape = create_ball(r = BALL_RADIUS, position = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY)
 
 
 # Definicja funkcji renderującej tekst
@@ -132,19 +109,15 @@ i = 0
 avg_time = 0
 avg_fps = 0
 
-right_rotating = 0
-left_rotating = 0
-
 
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
-        elif event.type == KEYDOWN:
-            if event.key == K_RIGHT:  # Sprawdzenie, czy wciśnięto strzałkę w prawo
-                print("RIGHT PRESESED")
-                right_up = True
+        # elif event.type == KEYDOWN:
+        #     if event.key == K_RIGHT:  # Sprawdzenie, czy wciśnięto strzałkę w prawo
+        #         print("RIGHT PRESESED")
        
        
     # Wyczyszczenie ekranu
@@ -163,11 +136,9 @@ while running:
     # Symulacja
     space.step(val)
     
-    
     # Rysowanie obiektów
     for body in space.bodies:
         for shape in body.shapes:
-            shape.elasticity = ELASTICITY
             if isinstance(shape, pymunk.Circle):
                 pos = body.position
                 radius = shape.radius
@@ -178,13 +149,13 @@ while running:
                     if removed == NO_BALLS :
                         print("ALL GONE")
                         running = False
-                pygame.draw.circle(screen, colors[shape], (int(pos.x), int(pos.y)), int(radius), 0)
+                pygame.draw.circle(screen, object_colors[shape], (int(pos.x), int(pos.y)), int(radius), 0)
             elif isinstance(shape, pymunk.Segment):
                 a = shape.a
                 b = shape.b
                 w = int(shape.radius)
                 pygame.draw.line(screen, WHITE, a, b, 2*w + 1)
-
+                
     # Wyświetlanie licznika FPS
     draw_text(screen, f"FPS: {int(clock.get_fps())}", (0,0), BLACK)
     # draw_text(screen, f"AVG_FPS: {int(avg_fps)}", (200,0), BLACK)
