@@ -3,7 +3,7 @@ Python Project
 
 
 
-|             | Paweł Prus |   | Piotr Rusak |   |
+|             | Paweł Prus     | Piotr Rusak |   |
 |-------------|------------|---|-------------|---|
 | Spotkanie 3 |            |   |             |   |
 |             |            |   |             |   |
