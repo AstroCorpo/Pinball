@@ -9,7 +9,7 @@ from pygame.locals import *
 # width, height = 2550, 1340
 width, height = 600,1000
 
-ELASTICITY = 1.001
+ELASTICITY = 0.95
 BALL_RADIUS = 10
 NO_BALLS = 20
 FRICTION = 0.5
@@ -37,7 +37,15 @@ WALL_WIDTH = 10
 
 object_colors = {}
 
-def create_wall(start_pos = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), end_pos = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True) :
+def rand_color() :
+    return (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+
+def rand_pos() :
+    global WALL_WIDTH, width, height
+    return (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH))
+
+def create_wall(start_pos = rand_pos(), end_pos = rand_pos(), color = rand_color(), width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True) :
+    global object_colors, space
     if static :
         wall = pymunk.Body(body_type=pymunk.Body.STATIC)
     else : 
@@ -52,10 +60,10 @@ def create_wall(start_pos = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.
 right_wall, right_wall_shape = create_wall(start_pos = (width - WALL_WIDTH//2, 0), end_pos = (width - WALL_WIDTH//2, height),color = WHITE)
 left_wall, left_wall_shape = create_wall(start_pos = (WALL_WIDTH//2, 0), end_pos = (WALL_WIDTH//2, height),color = WHITE)
 ceil, ceil_shape = create_wall(start_pos = (0, WALL_WIDTH//2), end_pos = (width, WALL_WIDTH//2),color = WHITE)
-# floor, floor_shape = create_wall(start_pos = (0, height - WALL_WIDTH//2), end_pos = (width, height - WALL_WIDTH//2),color = WHITE)
+floor, floor_shape = create_wall(start_pos = (0, height - WALL_WIDTH//2), end_pos = (width, height - WALL_WIDTH//2),color = WHITE)
 
 
-def create_ball(r = BALL_RADIUS, position = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY) :
+def create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY) :
     global object_colors, space
     ball = None
     if static : ball = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -74,7 +82,14 @@ def create_ball(r = BALL_RADIUS, position = (random.randint(WALL_WIDTH,width-WAL
     
 
 for i in range(NO_BALLS) :
-    ball,ball_shape = create_ball(r = BALL_RADIUS, position = (random.randint(WALL_WIDTH,width-WALL_WIDTH),random.randint(WALL_WIDTH,height-WALL_WIDTH)), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY)
+    ball,ball_shape = create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
+    
+# ball_1 = create_ball(r = 1.5*BALL_RADIUS, position = (width//2,height//2 - 4*BALL_RADIUS), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY)
+static_1 = create_wall(start_pos = (width//2,height//2), end_pos = (width//2,height//3), color = rand_color(), width = WALL_WIDTH, friction = FRICTION, elasticity = 1.5*ELASTICITY, static = True)
+static_2 = create_ball(r = 2*BALL_RADIUS, position = (width//3,height//4), static = True, mass = None, color = rand_color(), elasticity = 1.5*ELASTICITY)
+static_3 = create_ball(r = 2*BALL_RADIUS, position = (2*width//3,height//4), static = True, mass = None, color = rand_color(), elasticity = 1.5*ELASTICITY)
+
+
 
 def draw_circle(body, shape) :
     pos = body.position
@@ -85,7 +100,7 @@ def draw_segment(body,shape) :
     a = shape.a
     b = shape.b
     w = int(shape.radius)
-    pygame.draw.line(screen, WHITE, a, b, 2*w + 1)
+    pygame.draw.line(screen, object_colors[shape], a, b, 2*w + 1)
 
 # Definicja funkcji renderującej tekst
 def draw_text(surface, text, pos, color, font_size=24):
