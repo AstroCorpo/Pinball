@@ -26,6 +26,7 @@ FLIPPER_LENGTH = 60
 FLIPPER_ANGLE = -np.pi/6
 FLIPPER_X = np.abs(FLIPPER_LENGTH*np.cos(FLIPPER_ANGLE))
 FLIPPER_Y = np.abs(FLIPPER_LENGTH*np.sin(FLIPPER_ANGLE))
+POINTS = 0
 
 base_width = width
 width = width + 3*WALL_WIDTH + 2*BALL_RADIUS
@@ -75,7 +76,7 @@ def create_wall(start_pos = rand_pos(), end_pos = rand_pos(), color = rand_color
     space.add(wall, wall_shape)
     return wall, wall_shape
 
-position_left = (base_width//2 - 3*BALL_RADIUS - FLIPPER_X,0.9*height - FLIPPER_Y)
+position_left = (base_width//2 - 2*BALL_RADIUS - FLIPPER_X,0.95*height - FLIPPER_Y)
 position_right = base_width - position_left[0],position_left[1]
 
 right_wall, right_wall_shape = create_wall(start_pos = (width - WALL_WIDTH//2, 0), end_pos = (width - WALL_WIDTH//2, height),color = WHITE)
@@ -83,17 +84,20 @@ left_wall, left_wall_shape = create_wall(start_pos = (WALL_WIDTH//2, 0), end_pos
 ceil, ceil_shape = create_wall(start_pos = (0, WALL_WIDTH//2), end_pos = (width, WALL_WIDTH//2),color = WHITE)
 
 
-floor1, floor1_shape = create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height), end_pos = (width, height),color = WHITE)
+floor, floor_shape = create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height), end_pos = (width, height),color = WHITE)
 floor1, floor1_shape = create_wall(start_pos = (0, 0.9*height), end_pos = ((5/12)*base_width, height),color = WHITE)
 floor2, floor2_shape = create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 0.9*height), end_pos = ((7/12)*base_width, height),color = WHITE)
+floor3, floor3_shape = create_wall(start_pos = (0, height - WALL_WIDTH // 2), end_pos = ((4.5/12)*base_width, height - WALL_WIDTH // 2),color = WHITE)
+floor4, floor4_shape = create_wall(start_pos = (base_width, height - WALL_WIDTH // 2), end_pos = ((7.5/12)*base_width, height - WALL_WIDTH // 2),color = WHITE)
 
-floor3, floor3_shape = create_wall(start_pos = (WALL_WIDTH + 3*BALL_RADIUS, 0.8*height), end_pos = position_left,color = WHITE)
+floor5, floor5_shape = create_wall(start_pos = (WALL_WIDTH + 3*BALL_RADIUS, 0.85*height), end_pos = position_left,color = WHITE, width = 0.85*WALL_WIDTH)
 
-floor4, floor4_shape = create_wall(start_pos = (base_width - (WALL_WIDTH + 3*BALL_RADIUS), 0.8*height), end_pos = position_right,color = WHITE)
+floor6, floor6_shape = create_wall(start_pos = (base_width - (WALL_WIDTH + 3*BALL_RADIUS), 0.85*height), end_pos = position_right,color = WHITE, width = 0.85*WALL_WIDTH)
+
 
 
 divide, divide_shape = create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 4*WALL_WIDTH + BALL_RADIUS*2), end_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height),color = WHITE)
-divide2, divide2_shape = create_wall(start_pos = (width, 5*WALL_WIDTH), end_pos = (width - 5*WALL_WIDTH, 0),color = WHITE)
+divide2, divide2_shape = create_wall(start_pos = (width, 4.5*WALL_WIDTH), end_pos = (width - 4.5*WALL_WIDTH, 0),color = WHITE, width = 1.5*WALL_WIDTH)
 
 
 
@@ -189,18 +193,20 @@ def create_flipper(points, position, side, color) :
     return flipper_body, flipper_shape
 
 flipper_points = generate_flipper_points(60, -np.pi/6)
-base_points = generate_flipper_points(2*BALL_RADIUS)
+base_points = generate_flipper_points(BALL_RADIUS)
 
 flipper_color = rand_color()
 
 right_flipper_body, right_flipper_shape = create_flipper(flipper_points, position_right, 'right', flipper_color)
 left_flipper_body, left_flipper_shape = create_flipper(flipper_points, position_left, 'left', flipper_color)
-base_flipper_body, base_flipper_shape = create_flipper(base_points, (width - 2*WALL_WIDTH, height - 2*WALL_WIDTH), 'right', flipper_color)
+base_right_flipper_body, base_right_flipper_shape = create_flipper(base_points, (width - 1.5*WALL_WIDTH, height - 1.2*WALL_WIDTH), 'right', WHITE)
+base_left_flipper_body, base_left_flipper_shape = create_flipper(base_points, (width - 2*WALL_WIDTH - 2*BALL_RADIUS, height - 1.2*WALL_WIDTH), 'left', WHITE)
 
 # Ustawienie maski kolizji dla flipperów
 right_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
 left_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
-base_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
+base_right_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
+base_left_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
 
 # Ustawienie maski kolizji dla ścian
 right_wall_shape.filter = pymunk.ShapeFilter(categories=0x1)
@@ -210,22 +216,40 @@ floor1_shape.filter = pymunk.ShapeFilter(categories=0x1)
 floor2_shape.filter = pymunk.ShapeFilter(categories=0x1)
 floor3_shape.filter = pymunk.ShapeFilter(categories=0x1)
 floor4_shape.filter = pymunk.ShapeFilter(categories=0x1)
+floor5_shape.filter = pymunk.ShapeFilter(categories=0x1)
+floor6_shape.filter = pymunk.ShapeFilter(categories=0x1)
 divide_shape.filter = pymunk.ShapeFilter(categories=0x1)
 divide2_shape.filter = pymunk.ShapeFilter(categories=0x1)
 
 # Ustawienie maski kolizji dla ścian i flipperów
-for shape in [right_wall_shape, left_wall_shape, ceil_shape, floor1_shape, floor2_shape, floor3_shape, floor4_shape, divide_shape, divide2_shape]:
+for shape in [right_wall_shape, left_wall_shape, ceil_shape, floor1_shape, floor2_shape, floor3_shape, floor4_shape, floor5_shape, floor6_shape, divide_shape, divide2_shape]:
     shape.filter = pymunk.ShapeFilter(mask=pymunk.ShapeFilter.ALL_MASKS() & ~0x2)  # Wyłączenie maski flipperów
 
-    
-    
+
+obstacle_color = rand_color()
+
 # ball_1 = create_ball(r = 1.5*BALL_RADIUS, position = (width//2,height//2 - 4*BALL_RADIUS), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY)
-# static_1 = create_wall(start_pos = (width//2,height//2), end_pos = (width//2,height//3), color = rand_color(), width = WALL_WIDTH, friction = FRICTION, elasticity = 1.5*ELASTICITY, static = True)
-# static_2 = create_ball(r = 2*BALL_RADIUS, position = (width//3,height//4), static = True, mass = None, color = rand_color(), elasticity = 1.5*ELASTICITY)
-# static_3 = create_ball(r = 2*BALL_RADIUS, position = (2*width//3,height//4), static = True, mass = None, color = rand_color(), elasticity = 1.5*ELASTICITY)
+static_1 = create_wall(start_pos = (base_width//2,height//2), end_pos = (base_width//2,height//3), color = obstacle_color, width = WALL_WIDTH, friction = FRICTION, elasticity = 1.5*ELASTICITY, static = True)
+static_2 = create_ball(r = 2*BALL_RADIUS, position = (base_width//3,height//4), static = True, mass = None, color = obstacle_color, elasticity = 1.5*ELASTICITY)
+static_3 = create_ball(r = 2*BALL_RADIUS, position = (2*base_width//3,height//4), static = True, mass = None, color = obstacle_color, elasticity = 1.5*ELASTICITY)
+
+
+def destroy_blockade() :
+    space.remove(divide)
+    space.remove(divide_shape)
+    
+    return create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 4*WALL_WIDTH + BALL_RADIUS*2), end_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height),color = WHITE)
+
+def summon_blockade() :
+    space.remove(divide)
+    space.remove(divide_shape)
+    print("blockade summoned")
+    return create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 0), end_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height),color = WHITE)
 
 def spawn_ball() :
-    ball,ball_shape = create_ball(r = BALL_RADIUS, position = (width - WALL_WIDTH//2 - BALL_RADIUS, height - 2*WALL_WIDTH - 2*BALL_RADIUS), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
+    global divide, divide_shape
+    divide, divide_shape = destroy_blockade()
+    return create_ball(r = BALL_RADIUS, position = (width - WALL_WIDTH//2 - BALL_RADIUS, height - 2*WALL_WIDTH - 2*BALL_RADIUS), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
 
 def draw_circle(body, shape) :
     pos = body.position
@@ -249,19 +273,33 @@ def draw_text(surface, text, pos, color, font_size=24):
     text_surface = font.render(text, True, color)
     surface.blit(text_surface, pos)
 
-def inside(position) :
+def is_inside(position,wid = width, hei = height) :
     x,y = position
     if x < 0 : return False
-    if x > width : return False
+    if x > wid : return False
     if y < 0 : return False
-    if y > height : return False
+    if y > hei : return False
     return True
 
 def distance(point_a,point_b) :
     return np.sqrt((point_a[0] - point_b[0])**2 + (point_a[1] - point_b[1])**2)
 
+def increase_points(arbiter, space, _):
+    # Znajdź kolizję
+    ball_shape, obstacle_shape = arbiter.shapes
+    
+    # Sprawdź, czy przeszkoda jest kołem
+    if isinstance(obstacle_shape, pymunk.Circle):
+        # Zwiększ wartość POINTS o 100
+        global POINTS
+        POINTS += 100
 
-spawn_ball()
+# Rejestracja funkcji obsługi zdarzeń kolizji
+handler = space.add_collision_handler(1, 2)
+handler.begin = increase_points
+
+
+ball, ball_shape = spawn_ball()
 removed = 0
 
 
@@ -278,6 +316,15 @@ base_flipper_pressed = False
 
 target_angle = np.pi/3
 
+max_energy = 200
+energy_stored = 0
+energy_direction = 1
+time_passed = 0
+shoot = False
+
+inside = False
+
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -285,13 +332,6 @@ while running:
             running = False
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
             pygame.image.save(screen, "flipper.png")
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_RIGHT:
-                right_flipper_pressed = False
-            elif event.key == pygame.K_LEFT:
-                left_flipper_pressed = False
-            elif event.key == pygame.K_SPACE:
-                base_flipper_pressed = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
                 right_flipper_pressed = True
@@ -299,21 +339,60 @@ while running:
                 left_flipper_pressed = True
             elif event.key == pygame.K_SPACE:
                 base_flipper_pressed = True
+                energy_stored = 0
+        elif event.type == pygame.KEYUP:
+            if event.key == pygame.K_RIGHT:
+                right_flipper_pressed = False
+            elif event.key == pygame.K_LEFT:
+                left_flipper_pressed = False
+            elif event.key == pygame.K_SPACE:
+                base_flipper_pressed = False
+                base_right_flipper_body.angular_velocity = (base_flipper_target_angle - base_right_flipper_body.angle) * energy_stored
+                base_left_flipper_body.angular_velocity = (-base_flipper_target_angle - base_left_flipper_body.angle) * energy_stored
+                # energy_stored = 0
+                shoot = True
+                print(shoot)
     
        
     # Wyczyszczenie ekranu
     screen.fill(BLACK)
     
+    if base_flipper_pressed :
+        print(energy_stored)
+        val = avg_time / 0.75
+        energy_stored += max_energy*val*energy_direction
+        if energy_stored >= max_energy :
+            energy_stored  = max_energy
+            time_passed += avg_time
+            if time_passed >= 0.25 :
+                time_passed = 0
+                energy_direction = -1
+        if energy_stored <= 0 :
+            energy_stored = 0
+            time_passed += avg_time
+            if time_passed >= 0.25 :
+                time_passed = 0
+                energy_direction = 1
+            
     
-    right_flipper_body.velocity = left_flipper_body.velocity = base_flipper_body.velocity = 0, 0
+    
+    right_flipper_body.velocity = left_flipper_body.velocity = base_right_flipper_body.velocity = base_left_flipper_body.velocity = 0, 0
 
     right_flipper_target_angle = target_angle if right_flipper_pressed else 0
     left_flipper_target_angle = -target_angle if left_flipper_pressed else 0
-    base_flipper_target_angle = target_angle if base_flipper_pressed else 0
+    base_flipper_target_angle = target_angle if shoot else 0
+    
+    if shoot :
+        # print(base_flipper_target_angle)
+        time_passed += avg_time
+        if time_passed >= 0.3 :
+            shoot = False
+            time_passed = 0
 
     right_flipper_body.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
     left_flipper_body.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
-    base_flipper_body.angular_velocity = (base_flipper_target_angle - base_flipper_body.angle) * 100
+    base_right_flipper_body.angular_velocity = (base_flipper_target_angle - base_right_flipper_body.angle) * energy_stored
+    base_left_flipper_body.angular_velocity = (-base_flipper_target_angle - base_left_flipper_body.angle) * energy_stored
     
     
     
@@ -335,11 +414,17 @@ while running:
         for shape in body.shapes:
             if isinstance(shape, pymunk.Circle):
                 pos = body.position
-                if not inside(pos) :
+                if not inside and body == ball:
+                    if is_inside(pos,base_width) :
+                        divide, divide_shape = summon_blockade()
+                        POINTS += round(energy_stored)
+                        inside = True
+                if not is_inside(pos) :
                     space.remove(body)
                     print("REMOVED")
                     removed += 1
-                    spawn_ball()
+                    inside = False
+                    ball, ball_shape = spawn_ball()
                     if removed == NO_BALLS :
                         print("ALL GONE")
                         running = False
@@ -351,6 +436,8 @@ while running:
                     
     # Wyświetlanie licznika FPS
     draw_text(screen, f"FPS: {int(clock.get_fps())}", (0,0), BLACK)
+    draw_text(screen, f"Balls left: {NO_BALLS - removed}", (0,height - 14), BLACK)
+    draw_text(screen, f"{POINTS}", (width//2,0), BLACK)
     # draw_text(screen, f"AVG_FPS: {int(avg_fps)}", (200,0), BLACK)
 
     # Odświeżenie ekranu
@@ -360,5 +447,7 @@ while running:
 # Wyjście z Pygame
 pygame.quit()
 
+
 print("avg_frametime",avg_time)
 print("avg_fps",round(avg_fps))
+print("POINTS: ", POINTS)
