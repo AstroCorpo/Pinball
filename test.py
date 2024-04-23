@@ -190,7 +190,7 @@ def draw_polygon(body, shape):
     pygame.draw.polygon(screen, object_colors[shape], transformed_vertices, 0)
 
 # Definicja funkcji renderującej tekst
-def draw_text(surface, text, pos, color, font_size=24):
+def draw_text_inside(surface, text, pos, color, font_size=24):
     font = pygame.font.SysFont(None, font_size)
     text_surface = font.render(text, True, color)
     surface.blit(text_surface, pos)
@@ -504,9 +504,9 @@ while run:
                         draw_polygon(body, shape)
 
             # Wyświetlanie licznika FPS
-            # draw_text(screen, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
-            # draw_text(screen, f"Balls left: {NO_BALLS - removed}", (0, height - 14), BLACK)
-            # draw_text(screen, f"{POINTS}", (width // 2, 0), BLACK)
+            # draw_text_inside(screen, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
+            # draw_text_inside(screen, f"Balls left: {NO_BALLS - removed}", (0, height - 14), BLACK)
+            # draw_text_inside(screen, f"{POINTS}", (width // 2, 0), BLACK)
             # draw_text(screen, f"AVG_FPS: {int(avg_fps)}", (200,0), BLACK)
 
             # Odświeżenie ekranu
