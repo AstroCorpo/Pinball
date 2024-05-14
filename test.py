@@ -23,7 +23,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
-FLIPPER_LENGTH = 60
+FLIPPER_LENGTH = 90
 FLIPPER_ANGLE = -np.pi / 6
 FLIPPER_X = np.abs(FLIPPER_LENGTH * np.cos(FLIPPER_ANGLE))
 FLIPPER_Y = np.abs(FLIPPER_LENGTH * np.sin(FLIPPER_ANGLE))
@@ -62,8 +62,6 @@ def create_wall(start_pos = rand_pos(), end_pos = rand_pos(), color = rand_color
     object_colors[wall_shape] = color
     space.add(wall, wall_shape)
     return wall, wall_shape
-
-
 
 def create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY) :
     global object_colors, space
@@ -274,7 +272,6 @@ while run:
         menu_state = "menu"
     elif menu_state == "game":
 
-
         # Inicjalizacja Pygame
         # pygame.init()
 
@@ -289,7 +286,7 @@ while run:
 
         object_colors = {}
 
-        position_left = (base_width // 2 - 2 * BALL_RADIUS - FLIPPER_X, 0.95 * height - FLIPPER_Y)
+        position_left = (base_width // 2 - 4 * BALL_RADIUS - FLIPPER_X, 0.95 * height - FLIPPER_Y)
         position_right = base_width - position_left[0], position_left[1]
 
         right_wall, right_wall_shape = create_wall(start_pos=(width - WALL_WIDTH // 2, 0),
