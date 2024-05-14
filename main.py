@@ -9,6 +9,8 @@ import menu
 import pygame
 from utility_functions import *
 from copy import deepcopy
+import resume
+import multiprocessing
 
 RUNNING = False
 WHITE = (255, 255, 255)
@@ -350,7 +352,7 @@ def in_tunnel() :
     if BASE_WIDTH < BALL.position[0] : return True
     return False
 
-
+STATE = []
     
 def run(preset="fancy"):
     global BALL, BALL_SHAPE, BLOCKADE, BLOCKADE_SHAPE, POINTS, BASE_WIDTH, TUNNEL_SIZE, WIDTH, breaking_point, BASE_FLIPPERS, WALLS, OBSTACLES, LAUNCH_ENERGY
@@ -394,6 +396,8 @@ def run(preset="fancy"):
     shoot = False
 
     inside = False
+    
+    paused = False
 
     RUNNING = True
     while RUNNING:
@@ -408,7 +412,13 @@ def run(preset="fancy"):
                 elif event.key == pygame.K_SPACE:
                     base_flipper_pressed = True
                     energy_stored = 0
-                # elif event.key == pygame.K_ESCAPE :
+                elif event.key == pygame.K_ESCAPE :
+                    paused = not paused
+                    # if paused :
+                    #     process = multiprocessing.Process(target = resume.run_resume_menu)
+                    #     process.start()
+                    #     process.join()
+                        
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
                     right_flipper_pressed = False
@@ -473,7 +483,8 @@ def run(preset="fancy"):
         avg_fps = ((avg_fps * i) + fps) / (i + 1)
 
         # Symulacja
-        SPACE.step(val)
+        if not paused :
+            SPACE.step(val)
 
         # Rysowanie obiektów
         for body in SPACE.bodies:
