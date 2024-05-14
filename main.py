@@ -8,6 +8,7 @@ import numpy as np
 import menu
 import pygame
 from utility_functions import *
+from copy import deepcopy
 
 RUNNING = False
 WHITE = (255, 255, 255)
@@ -42,6 +43,7 @@ POINTS_SET = {}
 WALLS = []
 BALLS = []
 OBSTACLES = []
+TRIANGLES = []
 RIGHT_FLIPPERS = []
 LEFT_FLIPPERS = []
 BASE_FLIPPERS = []
@@ -166,10 +168,50 @@ def create_flipper(length = FLIPPER_LENGTH, angle = FLIPPER_ANGLE, position_x = 
 
     return flipper_body, flipper_shape
 
+def create_triangle(a,b,c,d,e,f,g,h,i, static = True, elast = ELASTICITY) :
+    # print("-> create_triangle", end = " ")
+    # print(points[0][0], end = ",")
+    # print(points[0][1], end = ",")
+    # print(points[1][0], end = ",")
+    # print(points[1][1], end = ",")
+    # print(points[2][0], end = ",")
+    # print(points[2][1], end = ",")
+    # print(color[0], end = ",")
+    # print(color[1], end = ",")
+    # print(color[2], end = ",")
+    # print(static, end = ",")
+    # print(elast, end = " \n")
+    # print(" ")
+    points = [(a,b),(c,d),(e,f)]
+    color = (g,h,i)
+    
+    
+    mass = poly_field(points)
+    moment = pymunk.moment_for_poly(mass, points)
+
+    body = pymunk.Body(mass, moment)
+    if static :
+        body.body_type=pymunk.Body.STATIC
+    body.position = points[0]
+    
+    new_points = deepcopy(points)
+    
+    new_points[1] = (new_points[1][0] - new_points[0][0], new_points[1][1] - new_points[0][1])
+    new_points[2] = (new_points[2][0] - new_points[0][0], new_points[2][1] - new_points[0][1])
+    new_points[0] = (0,0)
+    
+    shape = pymunk.Poly(body, new_points)
+    shape.elasticity = elast
+    shape.filter = pymunk.ShapeFilter(categories=0x1)
+    SPACE.add(body, shape)
+
+    OBJECT_COLORS[shape] = color
+    
+    return body, shape
 
 # Load global variables
 def load_map(name) :
-    global WALLS, BALLS, BALL, BALL_SHAPE, BALL_PARAMS, RIGHT_FLIPPERS, LEFT_FLIPPERS, BASE_FLIPPERS, BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS
+    global WALLS, BALLS, BALL, BALL_SHAPE, BALL_PARAMS, RIGHT_FLIPPERS, LEFT_FLIPPERS, BASE_FLIPPERS, BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS, WIDTH, HEIGHT
     with open(os.path.join(SCRIPT_PATH, 'maps', name + '.txt'), 'r') as file:
         lines = file.readlines()
         for line in lines:
@@ -178,6 +220,8 @@ def load_map(name) :
                 function_name = parts[1]
                 parameters = [eval(param) for param in parts[2].split(',')]
                 if function_name == "create_wall":
+                    if (parameters[0],parameters[3],parameters[3],parameters[3]) == (500,1190,553,1190) :
+                        print("FLOOOR")
                     WALLS.append(create_wall(*parameters))
                 elif function_name == "create_flipper":
                     checker = parameters.pop()
@@ -191,6 +235,9 @@ def load_map(name) :
                         BASE_FLIPPERS.append(data)
                 elif function_name == "create_ball":
                     BALLS.append(create_ball(*parameters))
+                elif function_name == "create_triangle" :
+                    TRIANGLES.append(create_triangle(*parameters))
+                    
             elif line[0] == "#" :
                 parts = line.split(" ")
                 if parts[1] == 'BLOCKADE' :
@@ -217,6 +264,7 @@ def load_map(name) :
                         data = create_ball(*parameters)
                         BALLS.append(data)
                     OBSTACLES.append(data)
+            elif line[0] == '%' : continue
             else :
                 parts = line.split('#')
                 if parts[0] == ' \n' or parts[0] == '\n' : continue
@@ -226,6 +274,7 @@ def load_map(name) :
                 else : var_value = eval(parts[0])
                 var_name = parts[1].split(' ')[-2]
                 globals()[var_name] = var_value
+    print(WIDTH, HEIGHT)
                 
 
 
@@ -296,8 +345,14 @@ def is_inside(position,wid = WIDTH, hei = HEIGHT) :
     return True
 
 
+def in_tunnel() :
+    global BALL, BASE_WIDTH
+    if BASE_WIDTH < BALL.position[0] : return True
+    return False
+
+
     
-def run(preset="default"):
+def run(preset="fancy"):
     global BALL, BALL_SHAPE, BLOCKADE, BLOCKADE_SHAPE, POINTS, BASE_WIDTH, TUNNEL_SIZE, WIDTH, breaking_point, BASE_FLIPPERS, WALLS, OBSTACLES, LAUNCH_ENERGY
     print("RUNNING WITH PRESET", preset)
     menu.quit_menu()
@@ -386,7 +441,7 @@ def run(preset="default"):
 
         right_flipper_target_angle = TARGET_ANGLE if right_flipper_pressed else 0
         left_flipper_target_angle = -TARGET_ANGLE if left_flipper_pressed else 0
-        base_flipper_target_angle = TARGET_ANGLE if shoot else 0
+        base_flipper_target_angle = -TARGET_ANGLE if shoot else 0
 
         if shoot:
             time_passed += avg_time
@@ -449,11 +504,15 @@ def run(preset="default"):
 
                 # Check for collisions with the ball
                 if (body, shape) in OBSTACLES :
-                    # print(BALL_SHAPE)
+                    if in_tunnel() : continue
                     _,_,dist = shortest_distance_between_shapes(BALL_SHAPE, shape)
-                    if dist < 50 :
-                        print("+",POINTS_SET[shape],"POINTS!")
-                        POINTS += POINTS_SET[shape]
+                    if dist < 3*BALL_RADIUS :
+                        if shape in POINTS_SET :
+                            print("+",POINTS_SET[shape],"POINTS!")
+                            POINTS += POINTS_SET[shape]
+                        else :
+                            print("+ 10 POINTS!")
+                            POINTS += 10
 
         # Wyświetlanie licznika FPS
         draw_text_inside(SCREEN, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
