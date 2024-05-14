@@ -353,8 +353,10 @@ def in_tunnel() :
     return False
 
 STATE = []
-    
+
 def run(preset="fancy"):
+    import threading
+    thread = threading.Thread(target=resume.run_resume_menu)
     global BALL, BALL_SHAPE, BLOCKADE, BLOCKADE_SHAPE, POINTS, BASE_WIDTH, TUNNEL_SIZE, WIDTH, breaking_point, BASE_FLIPPERS, WALLS, OBSTACLES, LAUNCH_ENERGY
     print("RUNNING WITH PRESET", preset)
     menu.quit_menu()
@@ -400,6 +402,8 @@ def run(preset="fancy"):
     paused = False
 
     RUNNING = True
+    import threading
+
     while RUNNING:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -414,11 +418,10 @@ def run(preset="fancy"):
                     energy_stored = 0
                 elif event.key == pygame.K_ESCAPE :
                     paused = not paused
-                    # if paused :
-                    #     process = multiprocessing.Process(target = resume.run_resume_menu)
-                    #     process.start()
-                    #     process.join()
-                        
+                    if paused:
+                        thread.start()
+                        thread.join()
+
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
                     right_flipper_pressed = False
@@ -485,6 +488,8 @@ def run(preset="fancy"):
         # Symulacja
         if not paused :
             SPACE.step(val)
+        else:
+            continue
 
         # Rysowanie obiektów
         for body in SPACE.bodies:

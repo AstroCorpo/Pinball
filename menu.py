@@ -4,8 +4,8 @@ import pygame, os
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 MENU_WIDTH, MENU_HEIGHT = 300, 200
-PAUSE_MENU_IMAGE_NAMES = ["resume", "keys", "options", "quit"]
-MAIN_MENU_IMAGE_NAMES = ["logo", "play", "options", "quit"]
+PAUSE_MENU_IMAGE_NAMES = ["keys", "options", "quit"]
+MAIN_MENU_IMAGE_NAMES = ["logo", "select_map", "options", "quit"]
 
 class Button:
     def __init__(self, image, x, y, action=None):
@@ -27,10 +27,9 @@ def quit_menu() :
     global RUNNING
     RUNNING = False
     
-def run_game() :
-    import main
-    main.run()
-    exit(0)
+def select_map():
+    from map_selection import run_map_menu
+    run_map_menu()
 
 def options_menu():
     from options import run_options_menu
@@ -48,7 +47,7 @@ def generate_image(name) :
 def generate_layout(icons, spacing=10) :
     global MENU_WIDTH, MENU_HEIGHT, SCRIPT_PATH
 
-    actions = {"quit": quit_menu, "play": run_game, "options": options_menu}
+    actions = {"quit": quit_menu, "select_map": select_map, "options": options_menu}
 
     collective_height = spacing
     max_width = 0

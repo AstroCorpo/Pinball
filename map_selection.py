@@ -1,28 +1,53 @@
-print("running options.py")
+print("running map_selection.py")
 import pygame, os
 
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-SETTINGS_WIDTH, SETTINGS_HEIGHT = 300, 200
-SETTINGS_MENU_IMAGE_NAMES = ["back", "change color", "keys"]
+MAP_WIDTH, MAP_HEIGHT = 300, 200
+MAP_IMAGE_NAMES = ["map1", "map2", "map3", "back"]
 
 class Button:
-    def __init__(self, image, x, y, action=None) :
+    def __init__(self, image, x, y, action=None):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.action = action
 
-    def draw(self, surface) :
+    def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-    def handle_event(self, event) :
+    def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.rect.collidepoint(event.pos):
                 if self.action:
                     self.action()
 
-def generate_image(name) :
+
+def quit_menu():
+    global RUNNING
+    RUNNING = False
+
+def run_map1():
+    import main, threading
+    thread = threading.Thread(target=main.run("default"))
+    thread.start()
+    thread.join()
+
+
+def run_map2():
+    import main
+    main.run("fancy")
+
+def run_map3():
+    import main
+    main.run("third")
+
+def back_to_main_menu():
+    from menu import run_main_menu
+    run_main_menu()
+
+
+def generate_image(name):
     img = pygame.Surface((100, 50))
     img.fill((0, 0, 0))
     font = pygame.font.SysFont(None, 24)
@@ -31,34 +56,11 @@ def generate_image(name) :
     img.blit(text, text_rect)
     return img
 
-def back_to_main_menu():
-    from menu import run_main_menu
-    run_main_menu()
-
-def change_color():
-    with open('globals.py', 'r') as file:
-        lines = file.readlines()
-    import random
-    first = "(52, 78, 91)"
-    second = "(37, 232, 128)"
-    # second = str((random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)))
-    # print(second)
-    with open('globals.py', 'w') as file:
-        if lines[0] == first:
-            lines[0] = second
-            file.writelines(lines)
-        elif lines[0] == second:
-            lines[0] = first
-            file.writelines(lines)
-
-def key_bindings():
-    from keys import run_keys_menu
-    run_keys_menu()
 
 def generate_layout(icons, spacing=10):
-    global SETTINGS_WIDTH, SETTINGS_HEIGHT, SCRIPT_PATH
+    global MAP_WIDTH, MAP_HEIGHT, SCRIPT_PATH
 
-    actions = {"back": back_to_main_menu, "keys": key_bindings, "change color": change_color}
+    actions = {"map1": run_map1, "map2": run_map2, "map3": run_map3, "back": back_to_main_menu}
 
     collective_height = spacing
     max_width = 0
@@ -66,6 +68,7 @@ def generate_layout(icons, spacing=10):
     for name in icons:
         filename = name + '.png'
         img_path = os.path.join(SCRIPT_PATH, 'images', filename)
+        img = None
         if os.path.exists(img_path):
             img = pygame.image.load(img_path)
         else:
@@ -78,53 +81,50 @@ def generate_layout(icons, spacing=10):
 
     max_width += 2 * spacing
 
-    SETTINGS_WIDTH = max(SETTINGS_WIDTH, max_width)
-    SETTINGS_HEIGHT = max(SETTINGS_HEIGHT, collective_height)
+    MAP_WIDTH = max(MAP_WIDTH, max_width)
+    MAP_HEIGHT = max(MAP_HEIGHT, collective_height)
 
     start = spacing
     for name in icons:
         img = layout[name]
         img_width, img_height = img.get_width(), img.get_height()
-        layout[name] = Button(img, (SETTINGS_WIDTH // 2) - (img_width // 2), start, action=actions.get(name))
+        layout[name] = Button(img, (MAP_WIDTH // 2) - (img_width // 2), start, action=actions.get(name))
         start += img_height + spacing
 
     return layout
 
 
-def run_options_menu(dimensions=None, type='main_menu'):
-
+def run_map_menu(dimensions=None, type='main'):
     with open('globals.py', 'r') as file:
         lines = file.readlines()
 
     BACKGROUND_COLOR = eval(lines[0])
 
-    global RUNNING, SETTINGS_WIDTH, SETTINGS_HEIGHT, SETTINGS_MENU_IMAGE_NAMES
+    global RUNNING, MAP_WIDTH, MAP_HEIGHT, MAP_IMAGE_NAMES
 
-    if dimensions != None:
-        SETTINGS_WIDTH, SETTINGS_HEIGHT = dimensions
+    if dimensions != None: MENU_WIDTH, MENU_HEIGHT = dimensions
 
-    image_names = SETTINGS_MENU_IMAGE_NAMES
+    image_names = MAP_IMAGE_NAMES
 
     pygame.init()
 
     layout = generate_layout(image_names)
 
-    flags = pygame.NOFRAME if type != 'main_menu' else 0
-    screen = pygame.display.set_mode((SETTINGS_WIDTH, SETTINGS_HEIGHT), flags)
+    flags = pygame.NOFRAME if type != 'main' else 0
+    screen = pygame.display.set_mode((MAP_WIDTH, MAP_HEIGHT), flags)
 
     pygame.display.set_caption("Flipper Main Menu")
 
-    while RUNNING:
-        with open('globals.py', 'r') as file:
-            lines = file.readlines()
+    screen.fill(BACKGROUND_COLOR)
 
-        BACKGROUND_COLOR = eval(lines[0])
+    while RUNNING:
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                quit_menu()
+                break
             for button in layout.values():
                 button.handle_event(event)
         if not RUNNING: break
-
-        screen.fill(BACKGROUND_COLOR)
 
         for button in layout.values():
             button.draw(screen)
@@ -132,3 +132,7 @@ def run_options_menu(dimensions=None, type='main_menu'):
         pygame.display.flip()
 
     pygame.quit()
+
+
+if __name__ == "__main__":
+    run_map_menu()
