@@ -3,35 +3,43 @@ import button
 import pymunk
 import pygame
 import random
+import os
 import numpy as np
 from pygame.locals import *
 import pymunk.pygame_util
 from collections import deque
+from utility_functions import *
+from copy import deepcopy
+
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Ustawienie wymiarów okna
 # width, height = 2550, 1340
-width, height = 800, 1000
+width, height = 500, 1200
 
 ELASTICITY = 0.7
 BALL_RADIUS = 15
 NO_BALLS = 3
 FRICTION = 0.5
-WALL_WIDTH = 10
+WALL_WIDTH = 20
 # Definicja kolorów
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
-FLIPPER_LENGTH = 90
-FLIPPER_ANGLE = -np.pi / 6
-FLIPPER_X = np.abs(FLIPPER_LENGTH * np.cos(FLIPPER_ANGLE))
-FLIPPER_Y = np.abs(FLIPPER_LENGTH * np.sin(FLIPPER_ANGLE))
+FLIPPER_LENGTH = 60
 POINTS = 0
+LAUNCH_ENERGY = 400
 
 base_width = width
-width = width + 3 * WALL_WIDTH + 2 * BALL_RADIUS
+width = int(round(width + WALL_WIDTH + 2.2 * BALL_RADIUS))
+breaking_point = (base_width - WALL_WIDTH//2,2 * WALL_WIDTH + BALL_RADIUS * 3)
 
+a, b, c = [(0,height),((base_width // 2) - BALL_RADIUS,height), (0, height - 3*BALL_RADIUS)]
+FLIPPER_ANGLE = -np.arctan( (np.abs(distance_points(a,c))) / (np.abs(distance_points(b,a))) )
+FLIPPER_X = np.abs(FLIPPER_LENGTH * np.cos(FLIPPER_ANGLE))
+FLIPPER_Y = np.abs(FLIPPER_LENGTH * np.sin(FLIPPER_ANGLE))
 
 
 def rand_color() :
@@ -50,20 +58,21 @@ def poly_field(points):
         field += (x1 * y2 - x2 * y1)
     return abs(field) / 2
 
-def create_wall(start_pos = rand_pos(), end_pos = rand_pos(), color = rand_color(), width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True) :
-    global object_colors, space
-    if static :
-        wall = pymunk.Body(body_type=pymunk.Body.STATIC)
-    else :
-        wall = pymunk.Body()
-    wall_shape = pymunk.Segment(wall, start_pos, end_pos, width)
-    wall_shape.friction = friction
-    wall_shape.elasticity = elasticity
-    object_colors[wall_shape] = color
-    space.add(wall, wall_shape)
-    return wall, wall_shape
 
 def create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY) :
+    print("-> create_ball", end = " ")
+    print(r, end = ",")
+    print(position[0], end = ",")
+    print(position[1], end = ",")
+    print(static, end = ",")
+    print(mass, end = ",")
+    print(color[0], end = ",")
+    print(color[1], end = ",")
+    print(color[2], end = ",")
+    print(elasticity, end = " \n")
+    print(" ")
+    
+    
     global object_colors, space
     ball = None
     if static : ball = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -80,9 +89,6 @@ def create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = N
     space.add(ball, ball_shape)
     return ball,ball_shape
 
-
-
-# ball2,ball2_shape = create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
 
 def generate_flipper_points(d, posterior_angle = 0, density1 = 0, density2 = 0) :
     c_1 = (0,0)
@@ -131,45 +137,160 @@ def generate_flipper_points(d, posterior_angle = 0, density1 = 0, density2 = 0) 
 
     return list(points)
 
+def create_wall(start_pos = rand_pos(), end_pos = rand_pos(), color = rand_color(), width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True) :
+    print("-> create_wall", end = " ")
+    print(start_pos[0], end = ",")
+    print(start_pos[1], end = ",")
+    print(end_pos[0], end = ",")
+    print(end_pos[1], end = ",")
+    print(color[0], end = ",")
+    print(color[1], end = ",")
+    print(color[2], end = ",")
+    print(width, end = ",")
+    print(friction, end = ",")
+    print(elasticity, end = ",")
+    print(static, end = " \n")
+    print(" ")
+    
+    
+    w = width // 2
+    a_x, a_y = start_pos
+    b_x, b_y = end_pos
+    c_x, c_y = (a_x + b_x) // 2, (a_y + b_y) // 2
+    v_l = np.sqrt(((b_x - a_x)**2) + ((b_y - a_y)**2))
+    v_x, v_y = (b_x - a_x), (b_y - a_y)
+    points = [(-(v_x/2) - w * (v_y/v_l), -(v_y/2) + w * (v_x/v_l)), (-(v_x/2) + w * (v_y/v_l), -(v_y/2) - w * (v_x/v_l)), ((v_x/2) + w * (v_y/v_l), (v_y/2) - w * (v_x/v_l)), ((v_x/2) - w * (v_y/v_l), (v_y/2) + w * (v_x/v_l))]
 
 
-def create_flipper(points, position, side, color) :
+    position = (c_x, c_y)
+    mass = poly_field(points)
+    moment = pymunk.moment_for_poly(mass, points)
+    
+    body = None
+    if static :
+        body = pymunk.Body(mass, moment, body_type=pymunk.Body.STATIC)
+    else :
+        body = pymunk.Body(mass, moment)
+    body.position = position
+    shape = pymunk.Poly(body, points)
+    shape.elasticity = ELASTICITY
+    shape.filter = pymunk.ShapeFilter(categories=0x1)
+    space.add(body, shape)
 
+    object_colors[shape] = color
+
+    return body, shape
+    
+
+
+
+# ball2,ball2_shape = create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
+
+def create_triangle(points, color, static = True, elast = ELASTICITY) :
+    print("-> create_triangle", end = " ")
+    print(points[0][0], end = ",")
+    print(points[0][1], end = ",")
+    print(points[1][0], end = ",")
+    print(points[1][1], end = ",")
+    print(points[2][0], end = ",")
+    print(points[2][1], end = ",")
+    print(color[0], end = ",")
+    print(color[1], end = ",")
+    print(color[2], end = ",")
+    print(static, end = ",")
+    print(elast, end = " \n")
+    print(" ")
+    
+    
     mass = poly_field(points)
     moment = pymunk.moment_for_poly(mass, points)
 
-    init_angle = 0
+    body = pymunk.Body(mass, moment)
+    if static :
+        body.body_type=pymunk.Body.STATIC
+    body.position = points[0]
+    
+    new_points = deepcopy(points)
+    
+    new_points[1] = (new_points[1][0] - new_points[0][0], new_points[1][1] - new_points[0][1])
+    new_points[2] = (new_points[2][0] - new_points[0][0], new_points[2][1] - new_points[0][1])
+    new_points[0] = (0,0)
+    
+    shape = pymunk.Poly(body, new_points)
+    shape.elasticity = elast
+    shape.filter = pymunk.ShapeFilter(categories=0x1)
+    space.add(body, shape)
+
+    object_colors[shape] = color
+    
+    return body, shape
+    
+
+def create_flipper(length, angle, position, side, color, name = "") :
+
+    print("-> create_flipper", end = " ")
+    print(length, end = ",")
+    print(angle, end = ",")
+    print(position[0], end = ",")
+    print(position[1], end = ",")
+    print("'" + side + "'", end = ",")
+    print(color[0], end = ",")
+    print(color[1], end = ",")
+    print(color[2], end = ",")
+    print("'" + name + side + "_flipper" + "'", end = " \n")
+    print(" ")
+    
+    points = generate_flipper_points(length, angle)
+    
+    mass = poly_field(points)
+    moment = pymunk.moment_for_poly(mass, points)
+
+    # init_angle = 0
 
     if side == 'left' :
         for i in range(len(points)) : points[i] = (-points[i][0],points[i][1])
-        init_angle = -init_angle
-    # right flipper
+        # init_angle = -init_angle
+    
     flipper_body = pymunk.Body(mass, moment)
     flipper_body.position = position
     flipper_shape = pymunk.Poly(flipper_body, points)
     flipper_shape.elasticity = ELASTICITY
+    flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
     space.add(flipper_body, flipper_shape)
 
     object_colors[flipper_shape] = color
 
     return flipper_body, flipper_shape
 
-def destroy_blockade() :
-    space.remove(divide)
-    space.remove(divide_shape)
 
-    return create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 4*WALL_WIDTH + BALL_RADIUS*2), end_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height),color = WHITE)
+def replace_base_flippers() :
+    global base_right_flipper_body, base_right_flipper_shape
+    space.remove(base_right_flipper_body)
+    space.remove(base_right_flipper_shape)
+    
+    base_right_flipper_body, base_right_flipper_shape = create_flipper(2*BALL_RADIUS, 0, (width - WALL_WIDTH - 2.2*BALL_RADIUS, height - WALL_WIDTH), 'left', WHITE, "base_")
+    
+    
+    return base_right_flipper_body, base_right_flipper_shape
+
+def destroy_blockade() :
+    space.remove(blockade)
+    space.remove(blockade_shape)
+
+    # return create_wall(start_pos = (base_width, 0), end_pos = breaking_point,color = WHITE)
 
 def summon_blockade() :
-    space.remove(divide)
-    space.remove(divide_shape)
-    print("blockade summoned")
-    return create_wall(start_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, 0), end_pos = (width - 3*WALL_WIDTH - BALL_RADIUS*2, height),color = WHITE)
+    print("# BLOCKADE", end = " ")
+    return create_wall(start_pos = (base_width - WALL_WIDTH//2, 0), end_pos = breaking_point,color = WHITE)
 
 def spawn_ball() :
-    global divide, divide_shape
-    divide, divide_shape = destroy_blockade()
-    return create_ball(r = BALL_RADIUS, position = (width - WALL_WIDTH//2 - BALL_RADIUS, height - 2*WALL_WIDTH - 2*BALL_RADIUS), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
+    destroy_blockade()
+    replace_base_flippers()
+    ball_position = (width - WALL_WIDTH - 1.1 * BALL_RADIUS, height - WALL_WIDTH - 1.5 * BALL_RADIUS)
+    print(ball_position[0], "# BALL_POSITION_X")
+    print(ball_position[1], "# BALL_POSITION_Y")
+    print("# BALL", end = " ")
+    return create_ball(r = BALL_RADIUS, position = ball_position, static = False, mass = None, color = rand_color(), elasticity = ELASTICITY)
 
 def draw_circle(body, shape) :
     pos = body.position
@@ -195,10 +316,10 @@ def draw_text_inside(surface, text, pos, color, font_size=24):
 
 def is_inside(position,wid = width, hei = height) :
     x,y = position
-    if x < 0 : return False
-    if x > wid : return False
-    if y < 0 : return False
-    if y > hei : return False
+    if x < BALL_RADIUS : return False
+    if x > wid - BALL_RADIUS : return False
+    if y < BALL_RADIUS : return False
+    if y > hei + 2* BALL_RADIUS : return False
     return True
 
 def distance(point_a,point_b) :
@@ -217,7 +338,7 @@ def increase_points(arbiter, space, _):
 pygame.init()
 
 #create game window
-SCREEN_WIDTH = 800
+SCREEN_WIDTH = 600
 SCREEN_HEIGHT = 1000
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -233,12 +354,15 @@ font = pygame.font.SysFont("arialblack", 40)
 #define colours
 TEXT_COL = (255, 255, 255)
 
-#load button images
-resume_img = pygame.image.load("images/button_resume.png").convert_alpha()
-options_img = pygame.image.load("images/button_options.png").convert_alpha()
-quit_img = pygame.image.load("images/button_quit.png").convert_alpha()
-keys_img = pygame.image.load('images/button_keys.png').convert_alpha()
-back_img = pygame.image.load('images/button_back.png').convert_alpha()
+# Define the path to the images directory
+images_dir = os.path.join(SCRIPT_PATH, "images")
+
+# Load button images
+resume_img = pygame.image.load(os.path.join(images_dir, "resume.png")).convert_alpha()
+options_img = pygame.image.load(os.path.join(images_dir, "options.png")).convert_alpha()
+quit_img = pygame.image.load(os.path.join(images_dir, "quit.png")).convert_alpha()
+keys_img = pygame.image.load(os.path.join(images_dir, "keys.png")).convert_alpha()
+back_img = pygame.image.load(os.path.join(images_dir, "back.png")).convert_alpha()
 
 #create button instances
 resume_button = button.Button(304, 125, resume_img, 1)
@@ -285,90 +409,198 @@ while run:
         space.gravity = 0, 981  # Set its gravity
 
         object_colors = {}
+        def symmetry(point) :
+            if isinstance(point, list) :
+                points = []
+                for poin in point :
+                    points.append((base_width - poin[0], poin[1]))
+                return points
+            return base_width - point[0], point[1]
+        
+        def baricenter(points) :
+            a, b = 0,0
+            for c,d in points :
+                a += c
+                b += d
+            return (a/len(points), b/(len(points)))
+        
+        def shortest(point, points) :
+            dist = float('inf')
+            for poin in points :
+                dist = min(dist,distance_points(point, poin))
+            return dist
 
-        position_left = (base_width // 2 - 4 * BALL_RADIUS - FLIPPER_X, 0.95 * height - FLIPPER_Y)
-        position_right = base_width - position_left[0], position_left[1]
-
-        right_wall, right_wall_shape = create_wall(start_pos=(width - WALL_WIDTH // 2, 0),
-                                                   end_pos=(width - WALL_WIDTH // 2, height), color=WHITE)
-        left_wall, left_wall_shape = create_wall(start_pos=(WALL_WIDTH // 2, 0), end_pos=(WALL_WIDTH // 2, height),
-                                                 color=WHITE)
-        ceil, ceil_shape = create_wall(start_pos=(0, WALL_WIDTH // 2), end_pos=(width, WALL_WIDTH // 2), color=WHITE)
-
-        floor, floor_shape = create_wall(start_pos=(width - 3 * WALL_WIDTH - BALL_RADIUS * 2, height),
-                                         end_pos=(width, height), color=WHITE)
-        floor1, floor1_shape = create_wall(start_pos=(0, 0.9 * height), end_pos=((5 / 12) * base_width, height),
-                                           color=WHITE)
-        floor2, floor2_shape = create_wall(start_pos=(width - 3 * WALL_WIDTH - BALL_RADIUS * 2, 0.9 * height),
-                                           end_pos=((7 / 12) * base_width, height), color=WHITE)
-        floor3, floor3_shape = create_wall(start_pos=(0, height - WALL_WIDTH // 2),
-                                           end_pos=((4.5 / 12) * base_width, height - WALL_WIDTH // 2), color=WHITE)
-        floor4, floor4_shape = create_wall(start_pos=(base_width, height - WALL_WIDTH // 2),
-                                           end_pos=((7.5 / 12) * base_width, height - WALL_WIDTH // 2), color=WHITE)
-
-        floor5, floor5_shape = create_wall(start_pos=(WALL_WIDTH + 3 * BALL_RADIUS, 0.85 * height),
-                                           end_pos=position_left, color=WHITE, width=0.85 * WALL_WIDTH)
-
-        floor6, floor6_shape = create_wall(start_pos=(base_width - (WALL_WIDTH + 3 * BALL_RADIUS), 0.85 * height),
-                                           end_pos=position_right, color=WHITE, width=0.85 * WALL_WIDTH)
-
-        divide, divide_shape = create_wall(
-            start_pos=(width - 3 * WALL_WIDTH - BALL_RADIUS * 2, 4 * WALL_WIDTH + BALL_RADIUS * 2),
-            end_pos=(width - 3 * WALL_WIDTH - BALL_RADIUS * 2, height), color=WHITE)
-        divide2, divide2_shape = create_wall(start_pos=(width, 4.5 * WALL_WIDTH), end_pos=(width - 4.5 * WALL_WIDTH, 0),
-                                             color=WHITE, width=1.5 * WALL_WIDTH)
-
-        flipper_points = generate_flipper_points(60, -np.pi / 6)
-        base_points = generate_flipper_points(BALL_RADIUS)
-
+        position_left = (base_width // 2 - 2 * BALL_RADIUS - FLIPPER_X, 0.95 * height - FLIPPER_Y)
+        position_right = symmetry(position_left)
         flipper_color = rand_color()
 
-        right_flipper_body, right_flipper_shape = create_flipper(flipper_points, position_right, 'right', flipper_color)
-        left_flipper_body, left_flipper_shape = create_flipper(flipper_points, position_left, 'left', flipper_color)
-        base_right_flipper_body, base_right_flipper_shape = create_flipper(base_points, (
-        width - 1.5 * WALL_WIDTH, height - 1.2 * WALL_WIDTH), 'right', WHITE)
-        base_left_flipper_body, base_left_flipper_shape = create_flipper(base_points, (
-        width - 2 * WALL_WIDTH - 2 * BALL_RADIUS, height - 1.2 * WALL_WIDTH), 'left', WHITE)
+        
+        
+        walls = []
+        
+        
+        poin = [(base_width // 5 + 10, 10.75*height // 12 - 10), (base_width // 5 + 30 + 10, 10.75*height // 12 + 7 - 10), (base_width // 5 + 10, 10*height // 12 - 10)]
+        center_poin = baricenter(poin)
+        radius = 2
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        poin = [(WALL_WIDTH, 9*height // 12), (2*WALL_WIDTH, 8.75*height // 12), (WALL_WIDTH, 8.5*height // 12)]
+        center_poin = baricenter(poin)
+        radius = shortest(center_poin, poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        poin = [(base_width // 3, 8.75*height // 12)]
+        center_poin = baricenter(poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        
+        poin = [(WALL_WIDTH, 7*height // 12), (4*WALL_WIDTH, 6.5*height // 12), (WALL_WIDTH, 6*height // 12)]
+        walls.append(create_triangle(poin, color = WHITE))
+        walls.append(create_triangle(symmetry(poin), color = WHITE))
+        
+        
+        right_flipper_body2, right_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, symmetry((4*WALL_WIDTH, 6.5*height // 12)), 'right', flipper_color)
+        left_flipper_body2, left_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, (4*WALL_WIDTH, 6.5*height // 12), 'left', flipper_color)
+        
+        walls.append(create_wall(start_pos=(WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12),end_pos=(WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12), static=True, color=WHITE, width=WALL_WIDTH))
+        walls.append(create_wall(start_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12)),end_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12)), static=True, color=WHITE, width=WALL_WIDTH))
+        
+        poin = [(WALL_WIDTH, 3.25*height // 12), (2*WALL_WIDTH, 3.25*height // 12), (WALL_WIDTH, 3*height // 12)]
+        center_poin = baricenter(poin)
+        radius = shortest(center_poin, poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.5*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)]
+        center_poin = baricenter(poin)
+        radius = shortest(center_poin, poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        
+        poin = [(3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)]
+        center_poin = baricenter(poin)
+        radius = shortest(center_poin, poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        
+        poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3*height // 12)]
+        center_poin = baricenter(poin)
+        radius = shortest(center_poin, poin)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+        walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+        
+        center_poin = (base_width//2, 3*height // 12) 
+        print("# OBSTACLE",end = " ")
+        create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY)
+        
+        
+        
+        
+        
+        # walls
+        starting = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
+        ending = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12)
+        walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, width=2*WALL_WIDTH))
+        walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, width=2*WALL_WIDTH))
+        
+        starting = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)
+        ending = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
+        walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, width=WALL_WIDTH))
+        walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, width=WALL_WIDTH))
+        
+        walls.append(create_wall(start_pos=(width - WALL_WIDTH // 2, 0), end_pos=(width - WALL_WIDTH // 2, height), color=WHITE)) # right_wall
+        walls.append(create_wall(start_pos=(WALL_WIDTH // 2, 0), end_pos=(WALL_WIDTH // 2, height), color=WHITE)) # left_wall
+        walls.append(create_wall(start_pos=(0, WALL_WIDTH // 2), end_pos=(width, WALL_WIDTH // 2), color=WHITE)) # ceil
+        walls.append(create_wall(start_pos=(base_width - WALL_WIDTH//2, breaking_point[1]), end_pos=(base_width - WALL_WIDTH//2, height), color=WHITE)) # dividing wall
+        print("% tunnel floor")
+        walls.append(create_wall(start_pos=(base_width, height - WALL_WIDTH // 2), end_pos=(width, height - WALL_WIDTH // 2), color=WHITE)) # tunnel floor
+        walls.append(create_wall(start_pos=(width - 2.5*WALL_WIDTH, 0), end_pos=(width, 2.5*WALL_WIDTH), color=WHITE, elasticity=2*ELASTICITY)) # tunnel bumper
+        walls.append(create_triangle([(0,height), ((base_width // 2) - BALL_RADIUS,height), (0, height - 3*BALL_RADIUS)], color = WHITE, static = True))
+        walls.append(create_triangle([symmetry(((base_width // 2) - BALL_RADIUS,height)), symmetry((0,height)), symmetry((0, height - 3*BALL_RADIUS))], color = WHITE, static = True))
+        leng = 100
+        position_left_2 = (position_left[0] - np.cos(FLIPPER_ANGLE)*leng, position_left[1] + np.sin(FLIPPER_ANGLE)*leng)
+        walls.append(create_wall(start_pos=(position_left), end_pos=position_left_2, width=WALL_WIDTH*0.65, color=WHITE))
+        position_right_2 = symmetry(position_left_2)
+        walls.append(create_wall(start_pos=(position_right), end_pos=position_right_2, width=WALL_WIDTH*0.65, color=WHITE))
+        
+        
+        walls.append(create_wall(start_pos=(position_left_2[0], position_left_2[1] + 5), end_pos=(position_left_2[0], position_left_2[1] - 1.5*leng), width=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
+        walls.append(create_wall(start_pos=symmetry((position_left_2[0], position_left_2[1] + 5)), end_pos=symmetry((position_left_2[0], position_left_2[1] - 1.5*leng)), width=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
+        
+        walls.append(create_wall(start_pos = (position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3), end_pos=(position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20), width=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
+        walls.append(create_wall(start_pos = symmetry((position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3)), end_pos=symmetry((position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20)), width=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
+        
+        # all kinds of floor
+        
+        blockade, blockade_shape = summon_blockade()
+        
 
-        # Ustawienie maski kolizji dla flipperów
-        right_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
-        left_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
-        base_right_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
-        base_left_flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
+        def distance(point_a, point_b) :
+            return np.sqrt( ( (point_a[0] + point_b[0])**2 ) + ( (point_a[1] + point_b[1])**2 ) )
+        
+        def max_dist(points) :
+            dist = 0
+            for point_a in points :
+                for point_b in points :
+                    dist = max(dist, distance(point_a, point_b))
+            return dist
 
-        # Ustawienie maski kolizji dla ścian
-        right_wall_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        left_wall_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        ceil_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor1_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor2_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor3_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor4_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor5_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        floor6_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        divide_shape.filter = pymunk.ShapeFilter(categories=0x1)
-        divide2_shape.filter = pymunk.ShapeFilter(categories=0x1)
+        # flipper_points = generate_flipper_points(60, -np.pi / 6)
+        # base_points = generate_flipper_points(BALL_RADIUS)
+        
+        right_flipper_body, right_flipper_shape = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_right, 'right', flipper_color)
+        left_flipper_body, left_flipper_shape = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_left, 'left', flipper_color)
+        base_right_flipper_body, base_right_flipper_shape = create_flipper(2*BALL_RADIUS, 0, (width - WALL_WIDTH - 2.2*BALL_RADIUS, height - 0.9*WALL_WIDTH), 'left', WHITE, "base_")
+        
 
         # Ustawienie maski kolizji dla ścian i flipperów
-        for shape in [right_wall_shape, left_wall_shape, ceil_shape, floor1_shape, floor2_shape, floor3_shape,
-                      floor4_shape, floor5_shape, floor6_shape, divide_shape, divide2_shape]:
+        for _,shape in walls:
             shape.filter = pymunk.ShapeFilter(mask=pymunk.ShapeFilter.ALL_MASKS() & ~0x2)  # Wyłączenie maski flipperów
 
         obstacle_color = rand_color()
 
-        # ball_1 = create_ball(r = 1.5*BALL_RADIUS, position = (width//2,height//2 - 4*BALL_RADIUS), static = False, mass = None, color = (random.randint(0,255),random.randint(0,255),random.randint(0,255)), elasticity = ELASTICITY)
-        static_1 = create_wall(start_pos=(base_width // 2, height // 2), end_pos=(base_width // 2, height // 3),
-                               color=obstacle_color, width=WALL_WIDTH, friction=FRICTION, elasticity=1.5 * ELASTICITY,
-                               static=True)
-        static_2 = create_ball(r=2 * BALL_RADIUS, position=(base_width // 3, height // 4), static=True, mass=None,
-                               color=obstacle_color, elasticity=1.5 * ELASTICITY)
-        static_3 = create_ball(r=2 * BALL_RADIUS, position=(2 * base_width // 3, height // 4), static=True, mass=None,
-                               color=obstacle_color, elasticity=1.5 * ELASTICITY)
+       
+        # static_1 = create_wall(start_pos=(base_width // 2, height // 2), end_pos=(base_width // 2, height // 3), color=obstacle_color, width=WALL_WIDTH, friction=FRICTION, elasticity=1.5 * ELASTICITY, static=True)
+        # print("# OBSTACLE",end = " ")
+        # static_2 = create_ball(r=2 * BALL_RADIUS, position=(base_width // 3, height // 4), static=True, mass=None, color=obstacle_color, elasticity=1.5 * ELASTICITY)
+        # print("# OBSTACLE",end = " ")
+        # static_3 = create_ball(r=2 * BALL_RADIUS, position=(2 * base_width // 3, height // 4), static=True, mass=None, color=obstacle_color, elasticity=1.5 * ELASTICITY)
         # Rejestracja funkcji obsługi zdarzeń kolizji
         handler = space.add_collision_handler(1, 2)
         handler.begin = increase_points
 
         ball, ball_shape = spawn_ball()
+        # ball, ball_shape = None, None
         removed = 0
 
         model_fps = float('inf')
@@ -384,10 +616,11 @@ while run:
 
         target_angle = np.pi / 3
 
-        max_energy = 200
+        max_energy = LAUNCH_ENERGY
         energy_stored = 0
         energy_direction = 1
         time_passed = 0
+        max_time_passing = 1
         shoot = False
 
         inside = False
@@ -414,10 +647,8 @@ while run:
                         left_flipper_pressed = False
                     elif event.key == pygame.K_SPACE:
                         base_flipper_pressed = False
-                        base_right_flipper_body.angular_velocity = (
-                                                                               base_flipper_target_angle - base_right_flipper_body.angle) * energy_stored
-                        base_left_flipper_body.angular_velocity = (
-                                                                              -base_flipper_target_angle - base_left_flipper_body.angle) * energy_stored
+                        # base_right_flipper_body.angular_velocity = 100 * (base_flipper_target_angle - base_right_flipper_body.angle) * (energy_stored/max_energy) * np.pi
+                        # base_left_flipper_body.angular_velocity = 100 * (-base_flipper_target_angle - base_left_flipper_body.angle) * (energy_stored/max_energy) * np.pi
                         # energy_stored = 0
                         shoot = True
                         print(shoot)
@@ -432,35 +663,34 @@ while run:
                 if energy_stored >= max_energy:
                     energy_stored = max_energy
                     time_passed += avg_time
-                    if time_passed >= 0.25:
+                    if time_passed >= max_time_passing:
                         time_passed = 0
                         energy_direction = -1
                 if energy_stored <= 0:
                     energy_stored = 0
                     time_passed += avg_time
-                    if time_passed >= 0.25:
+                    if time_passed >= max_time_passing:
                         time_passed = 0
                         energy_direction = 1
 
-            right_flipper_body.velocity = left_flipper_body.velocity = base_right_flipper_body.velocity = base_left_flipper_body.velocity = 0, 0
+            right_flipper_body.velocity = left_flipper_body.velocity = right_flipper_body2.velocity = left_flipper_body2.velocity = base_right_flipper_body.velocity = 0, 0
 
             right_flipper_target_angle = target_angle if right_flipper_pressed else 0
             left_flipper_target_angle = -target_angle if left_flipper_pressed else 0
-            base_flipper_target_angle = target_angle if shoot else 0
+            base_flipper_target_angle = -target_angle if shoot else 0
 
             if shoot:
-                # print(base_flipper_target_angle)
                 time_passed += avg_time
-                if time_passed >= 0.3:
+                if time_passed >= 0.5:
                     shoot = False
+                    base_right_flipper_body, base_right_flipper_shape = replace_base_flippers()
                     time_passed = 0
 
             right_flipper_body.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
+            right_flipper_body2.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
             left_flipper_body.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
-            base_right_flipper_body.angular_velocity = (
-                                                                   base_flipper_target_angle - base_right_flipper_body.angle) * energy_stored
-            base_left_flipper_body.angular_velocity = (
-                                                                  -base_flipper_target_angle - base_left_flipper_body.angle) * energy_stored
+            left_flipper_body2.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
+            base_right_flipper_body.angular_velocity = (base_flipper_target_angle - base_right_flipper_body.angle) * (energy_stored)
 
             # Ustawienie limitu FPS
             clock.tick(model_fps)
@@ -482,7 +712,7 @@ while run:
                         pos = body.position
                         if not inside and body == ball:
                             if is_inside(pos, base_width):
-                                divide, divide_shape = summon_blockade()
+                                blockade, blockade_shape = summon_blockade()
                                 POINTS += round(energy_stored)
                                 inside = True
                         if not is_inside(pos):
@@ -501,9 +731,9 @@ while run:
                         draw_polygon(body, shape)
 
             # Wyświetlanie licznika FPS
-            # draw_text_inside(screen, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
-            # draw_text_inside(screen, f"Balls left: {NO_BALLS - removed}", (0, height - 14), BLACK)
-            # draw_text_inside(screen, f"{POINTS}", (width // 2, 0), BLACK)
+            draw_text_inside(screen, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
+            draw_text_inside(screen, f"Balls left: {NO_BALLS - removed}", (0, height - 14), BLACK)
+            draw_text_inside(screen, f"{POINTS}", (width // 2, 0), BLACK)
             # draw_text(screen, f"AVG_FPS: {int(avg_fps)}", (200,0), BLACK)
 
             # Odświeżenie ekranu
@@ -511,17 +741,19 @@ while run:
 
         # Wyjście z Pygame
         pygame.quit()
+        print(LAUNCH_ENERGY, "# LAUNCH_ENERGY \n\n")
+        print(model_fps, "# MODEL_FPS \n\n")
 
         print("avg_frametime", avg_time)
         print("avg_fps", round(avg_fps))
         print("POINTS: ", POINTS)
     pass
   else:
-    draw_text("Press SPACE to start", font, TEXT_COL, 160, 250)
+    draw_text("Press ESC to start", font, TEXT_COL, 160, 250)
 
   for event in pygame.event.get():
     if event.type == pygame.KEYDOWN:
-      if event.key == pygame.K_SPACE:
+      if event.key == pygame.K_ESCAPE:
         game_paused = True
     if event.type == pygame.QUIT:
       run = False
