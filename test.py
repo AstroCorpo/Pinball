@@ -29,7 +29,6 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
 FLIPPER_LENGTH = 60
-
 POINTS = 0
 LAUNCH_ENERGY = 400
 
@@ -58,7 +57,6 @@ def poly_field(points):
         x2, y2 = points[(i + 1) % n]
         field += (x1 * y2 - x2 * y1)
     return abs(field) / 2
-
 
 
 def create_ball(r = BALL_RADIUS, position = rand_pos(), static = False, mass = None, color = rand_color(), elasticity = ELASTICITY) :
@@ -397,7 +395,6 @@ while run:
       if back_button.draw(screen):
         menu_state = "menu"
     elif menu_state == "game":
-
 
         # Inicjalizacja Pygame
         # pygame.init()
