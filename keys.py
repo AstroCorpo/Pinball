@@ -35,7 +35,6 @@ def generate_leyout(icons, spacing = 10):
     max_width = 0
     layout = {}
 
-    # Wklejanie zdjęcia i sprawdzanie wymiarów
     for name in icons:
         filename = name + ".png"
         image_path = os.path.join(SCRIPT_PATH, 'images', filename)

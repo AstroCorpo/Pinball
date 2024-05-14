@@ -1,7 +1,6 @@
-print("running whole menu.py")
+print("running resume.py")
 import pygame, os
 
-# Global variables
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 RESUME_WIDTH, RESUME_HEIGHT = 300, 200

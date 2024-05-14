@@ -1,7 +1,6 @@
 print("running whole menu.py")
 import pygame, os
 
-# Global variables
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 MENU_WIDTH, MENU_HEIGHT = 300, 200
@@ -9,7 +8,7 @@ PAUSE_MENU_IMAGE_NAMES = ["resume", "keys", "options", "quit"]
 MAIN_MENU_IMAGE_NAMES = ["logo", "play", "options", "quit"]
 
 class Button:
-    def __init__(self, image, x, y, action=None) :
+    def __init__(self, image, x, y, action=None):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -27,14 +26,11 @@ class Button:
 def quit_menu() :
     global RUNNING
     RUNNING = False
-    print("menu down")
-
-def resume_menu() :
-    from resume import run_main_menu
     
 def run_game() :
     import main
     main.run()
+    exit(0)
 
 def options_menu():
     from options import run_options_menu
@@ -52,7 +48,7 @@ def generate_image(name) :
 def generate_layout(icons, spacing=10) :
     global MENU_WIDTH, MENU_HEIGHT, SCRIPT_PATH
 
-    actions = {"resume": resume_menu, "quit": quit_menu, "play": run_game, "options": options_menu}
+    actions = {"quit": quit_menu, "play": run_game, "options": options_menu}
 
     collective_height = spacing
     max_width = 0
@@ -86,7 +82,7 @@ def generate_layout(icons, spacing=10) :
     return layout
 
 
-def run_main_menu(dimensions = None, type = 'main') :
+def run_main_menu(dimensions = None, type = 'main'):
 
     with open('globals.py', 'r') as file:
         lines = file.readlines()
@@ -98,40 +94,32 @@ def run_main_menu(dimensions = None, type = 'main') :
     if dimensions != None : MENU_WIDTH, MENU_HEIGHT = dimensions
     
     image_names = PAUSE_MENU_IMAGE_NAMES if type != 'main' else MAIN_MENU_IMAGE_NAMES
-    
-    # Initialize Pygame
+
     pygame.init()
 
     layout = generate_layout(image_names)
 
-    # Set up the screen
     flags = pygame.NOFRAME if type != 'main' else 0
     screen = pygame.display.set_mode((MENU_WIDTH, MENU_HEIGHT), flags)
 
     pygame.display.set_caption("Flipper Main Menu")
 
-    # Main loop
-    while RUNNING:
+    screen.fill(BACKGROUND_COLOR)
 
-        for event in pygame.event.get() :
+    while RUNNING:
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit_menu()
                 break
-            for button in layout.values() :
+            for button in layout.values():
                 button.handle_event(event)
-        if not RUNNING : break
+        if not RUNNING: break
 
-        # Fill the background
-        screen.fill(BACKGROUND_COLOR)  # Fill with white for main menu
-
-        # Draw the buttons
-        for button in layout.values() :
+        for button in layout.values():
             button.draw(screen)
 
-        # Update the display
         pygame.display.flip()
 
-    # Quit Pygame
     pygame.quit()
 
 if __name__ == "__main__":

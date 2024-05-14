@@ -1,7 +1,6 @@
 print("running options.py")
 import pygame, os
 
-# Global variables
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETTINGS_WIDTH, SETTINGS_HEIGHT = 300, 200

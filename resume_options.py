@@ -1,7 +1,6 @@
 print("running resume options.py")
 import pygame, os
 
-# Global variables
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 SETTINGS_WIDTH, SETTINGS_HEIGHT = 300, 200
@@ -96,11 +95,6 @@ def generate_layout(icons, spacing=10):
 
 
 def run_resume_options_menu(dimensions=None, type='main_menu'):
-
-    with open('globals.py', 'r') as file:
-        lines = file.readlines()
-
-    BACKGROUND_COLOR = eval(lines[0])
 
     global RUNNING, SETTINGS_WIDTH, SETTINGS_HEIGHT, SETTINGS_MENU_IMAGE_NAMES
 
