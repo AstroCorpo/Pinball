@@ -1,0 +1,64 @@
+600 # WIDTH 
+1000 # HEIGHT 
+0.7 # ELASTICITY 
+15 # BALL_RADIUS 
+3 # NO_BALLS 
+0.5 # FRICTION 
+10 # WALL_WIDTH 
+1.0471975511965976 # TARGET_ANGLE 
+60 # FLIPPER_LENGTH 
+-0.5235987755982988 # FLIPPER_ANGLE 
+51.96152422706632 # FLIPPER_X 
+29.999999999999996 # FLIPPER_Y 
+0 # int GRAVITY_X 
+981 # int GRAVITY_Y 
+626.5 # BALL_POSITION_X 
+957.5 # BALL_POSITION_Y 
+250 # LAUNCH_ENERGY 
+inf # MODEL_FPS 
+ 
+-> create_wall 653,0,653,1000,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 10,0,10,1000,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 0,10,663,10,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 600,990,663,990,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 0,900.0,250.0,1000,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 600,900.0,350.0,1000,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 0,990,225.0,990,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 600,990,375.0,990,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 65,850.0,218.03847577293368,920.0,255,255,255,17.0,0.5,0.7,True 
+ 
+-> create_wall 535,850.0,381.9615242270663,920.0,255,255,255,17.0,0.5,0.7,True 
+ 
+-> create_wall 600,85,600,1000,255,255,255,20,0.5,0.7,True 
+ 
+-> create_wall 663,40,623,0,255,255,255,30.0,0.5,0.7,True 
+ 
+# BLOCKADE -> create_wall 600,0,600,85,255,255,255,20,0.5,0.7,True 
+ 
+-> create_flipper 60,-0.5235987755982988,381.9615242270663,920.0,'right',42,139,123,'right_flipper' 
+ 
+-> create_flipper 60,-0.5235987755982988,218.03847577293368,920.0,'left',42,139,123,'left_flipper' 
+ 
+-> create_flipper 15,0,643,982.0,'right',255,255,255,'base_right_flipper' 
+ 
+-> create_flipper 15,0,610,982.0,'left',255,255,255,'base_left_flipper' 
+ 
+-> create_flipper 15,0,643,982.0,'right',255,255,255,'base_right_flipper' 
+ 
+-> create_flipper 15,0,610,982.0,'left',255,255,255,'base_left_flipper' 
+ 
+-> create_wall 300,500,300,333,225,15,238,20,0.5,1.0499999999999998,True,30 
+ 
+# OBSTACLE -> create_ball 30,200,250,True,None,225,15,238,1.0499999999999998,20 
+ 
+# OBSTACLE -> create_ball 30,400,250,True,None,225,15,238,1.0499999999999998,20 
+ 
+# BALL -> create_ball 15,626.5,957.5,False,None,164,183,102,0.7 
