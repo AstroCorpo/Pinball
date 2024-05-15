@@ -16,3 +16,6 @@ Python Project
 
 # Reminders
 Add leaderboard
+add .JSON files
+add .env
+beautify code
