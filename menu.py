@@ -1,11 +1,13 @@
 print("running menu.py")
 import pygame, os
 from layouts.main_menu import generate_main_menu_layout
+import main
 
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 WIDTH, HEIGHT = 620, 640
 BACKGROUND_COLOR = (52, 78, 91)
+screen = None
 
 class Button:
     def __init__(self, image, x, y, action=None):
@@ -60,26 +62,32 @@ def change_color():
         BACKGROUND_COLOR = (52, 78, 91)
 
 def run_map1():
-    import main
-    main.run("default")
+    global screen
+    main.run("default","player1", screen)
 
 def run_map2():
-    import main
-    main.run("fancy")
+    global screen
+    main.run("fancy","player1", screen)
 
 def run_map3():
-    import main
-    main.run("third")
+    global screen
+    main.run("third","player1", screen)
 
 def run_menu(type='main'):
-
+    global screen
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
-
-    pygame.init()
 
     LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": play, "options": options_menu})
 
     flags = pygame.NOFRAME if type != 'main' else 0
+    
+    info = pygame.display.Info()
+    SCREEN_WIDTH, SCREEN_HEIGHT = info.current_w, info.current_h
+    x = (SCREEN_WIDTH - WIDTH) // 2
+    y = (SCREEN_HEIGHT - HEIGHT) // 2
+    os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (x,0)
+    os.environ['SDL_VIDEO_CENTERED'] = '0'
+    
     screen = pygame.display.set_mode((WIDTH, HEIGHT), flags)
 
     pygame.display.set_caption("Flipper Main Menu")
@@ -103,5 +111,7 @@ def run_menu(type='main'):
 
     pygame.quit()
 
+    
 if __name__ == "__main__":
+    pygame.init()
     run_menu()

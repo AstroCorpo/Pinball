@@ -1,5 +1,7 @@
 print("running whole main.py")
 import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 import random
@@ -9,69 +11,14 @@ import menu
 import pygame
 from utility_functions import *
 from copy import deepcopy
-import resume
-import multiprocessing
+import json
+import pause_menu as pause
 
-RUNNING = False
+
 WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
 BLACK = (0, 0, 0)
-SPACE = pymunk.Space()
-OBJECT_COLORS = {}
-POINTS = 0
 
-# Global variables
-WIDTH = 100
-HEIGHT = 100
-ELASTICITY = 1
-BALL_RADIUS = 1
-NO_BALLS = 1
-FRICTION = 1
-WALL_WIDTH = 1
-TARGET_ANGLE = 1
-FLIPPER_LENGTH = 1
-FLIPPER_ANGLE = 1
-FLIPPER_X = 1
-FLIPPER_Y = 1
-GRAVITY_X = 1
-GRAVITY_Y = 1
-BALL_POSITION_X = 1
-BALL_POSITION_Y = 1
-LAUNCH_ENERGY = 1
-MODEL_FPS = float('inf')
-POINTS_SET = {}
-WALLS = []
-BALLS = []
-OBSTACLES = []
-TRIANGLES = []
-RIGHT_FLIPPERS = []
-LEFT_FLIPPERS = []
-BASE_FLIPPERS = []
-BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS = None, None, None
-BALL, BALL_SHAPE, BALL_PARAMS = None, None, None
-
-
-BASE_WIDTH = WIDTH
-TUNNEL_SIZE = (2.2*BALL_RADIUS)
-WIDTH = int(round(WIDTH + (3/2) * WALL_WIDTH + TUNNEL_SIZE))
-breaking_point = (BASE_WIDTH, 2 * WALL_WIDTH + 3 * BALL_RADIUS)
-
-pygame.init()
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-
-def rand_pos() :
-    global WALL_WIDTH, WIDTH, HEIGHT
-    return (random.randint(WALL_WIDTH,WIDTH-WALL_WIDTH),random.randint(WALL_WIDTH,HEIGHT-WALL_WIDTH))
-
-def create_ball(r = BALL_RADIUS, position_x = None, position_y = None, static = False, mass = None, red = None, green = None, blue = None, elasticity = ELASTICITY, points = None, collision = None) :
-    global OBJECT_COLORS, SPACE
-    
-    position = (position_x, position_y)
-    if any(pos is None for pos in position) : position = rand_pos()
-    color = (red, green, blue)
-    if any(col is None for col in color) : color = rand_color()
+def create_ball(r, position, static = False, mass = None, color = rand_color(), elast = 0.5, object_colors = None, space = None) :
     
     ball = None
     if static : ball = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -83,28 +30,13 @@ def create_ball(r = BALL_RADIUS, position_x = None, position_y = None, static = 
         ball_shape.mass = mass
     else :
         ball_shape.mass = ball_shape.area/20
-    ball_shape.elasticity = elasticity
-    
-    if collision is not None :
-        ball_shape.collision_type = collision
-    if points is not None :
-        POINTS_SET[ball_shape] = points
-    
-    OBJECT_COLORS[ball_shape] = color
-    SPACE.add(ball, ball_shape)
-    return ball,ball_shape
+    ball_shape.elasticity = elast
+    object_colors[ball_shape] = color
+    space.add(ball, ball_shape)
+    return (ball,ball_shape), object_colors, space
 
-def create_wall(start_x = None, start_y = None, end_x = None, end_y = None, red = None, green = None, blue = None, segment_width = WALL_WIDTH, friction = FRICTION, elasticity = ELASTICITY, static = True, points_gain = None, collision = None) :
-    global OBJECT_COLORS, SPACE
-    
-    start_pos = (start_x, start_y)
-    if any(pos is None for pos in start_pos) : start_pos = rand_pos()
-    end_pos = (end_x, end_y)
-    if any(pos is None for pos in end_pos) : end_pos = rand_pos()
-    color = (red, green, blue)
-    if any(col is None for col in color) : color = rand_color()
-    
-    w = segment_width // 2
+def create_wall(start_pos, end_pos, color = rand_color(), width = 10, frict = 0.5, elast = 0.5, static = True, object_colors = None, space = None) :
+    w = width // 2
     a_x, a_y = start_pos
     b_x, b_y = end_pos
     c_x, c_y = (a_x + b_x) // 2, (a_y + b_y) // 2
@@ -124,70 +56,16 @@ def create_wall(start_x = None, start_y = None, end_x = None, end_y = None, red 
         body = pymunk.Body(mass, moment)
     body.position = position
     shape = pymunk.Poly(body, points)
-    shape.elasticity = ELASTICITY
-    
-    if collision is not None :
-        shape.collision_type = collision
-    if points is not None :
-        POINTS_SET[shape] = points_gain
-        
+    shape.elasticity = elast
+    shape.friction = frict
     shape.filter = pymunk.ShapeFilter(categories=0x1)
-    SPACE.add(body, shape)
+    space.add(body, shape)
 
-    OBJECT_COLORS[shape] = color
+    object_colors[shape] = color
 
-    return body, shape
+    return (body, shape), object_colors, space
 
-
-def create_flipper(length = FLIPPER_LENGTH, angle = FLIPPER_ANGLE, position_x = None, position_y = None, side = 'right', red = None, green = None, blue = None) :
-    global OBJECT_COLORS, SPACE
-    
-    position = position_x, position_y
-    if any(pos is None for pos in position) : position = rand_pos()
-    color = (red, green, blue)
-    if any(col is None for col in color) : color = rand_color()
-    
-    
-    points = generate_flipper_points(length, angle)
-    
-    mass = poly_field(points)
-    moment = pymunk.moment_for_poly(mass, points)
-
-    # init_angle = 0
-
-    if side == 'left' :
-        for i in range(len(points)) : points[i] = (-points[i][0],points[i][1])
-        # init_angle = -init_angle
-    
-    flipper_body = pymunk.Body(mass, moment)
-    flipper_body.position = position
-    flipper_shape = pymunk.Poly(flipper_body, points)
-    flipper_shape.elasticity = ELASTICITY
-    flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
-    SPACE.add(flipper_body, flipper_shape)
-
-    OBJECT_COLORS[flipper_shape] = color
-
-    return flipper_body, flipper_shape
-
-def create_triangle(a,b,c,d,e,f,g,h,i, static = True, elast = ELASTICITY) :
-    # print("-> create_triangle", end = " ")
-    # print(points[0][0], end = ",")
-    # print(points[0][1], end = ",")
-    # print(points[1][0], end = ",")
-    # print(points[1][1], end = ",")
-    # print(points[2][0], end = ",")
-    # print(points[2][1], end = ",")
-    # print(color[0], end = ",")
-    # print(color[1], end = ",")
-    # print(color[2], end = ",")
-    # print(static, end = ",")
-    # print(elast, end = " \n")
-    # print(" ")
-    points = [(a,b),(c,d),(e,f)]
-    color = (g,h,i)
-    
-    
+def create_triangle(points, color, static = True, elast = 0.5, object_colors = None, space = None) :
     mass = poly_field(points)
     moment = pymunk.moment_for_poly(mass, points)
 
@@ -205,174 +83,208 @@ def create_triangle(a,b,c,d,e,f,g,h,i, static = True, elast = ELASTICITY) :
     shape = pymunk.Poly(body, new_points)
     shape.elasticity = elast
     shape.filter = pymunk.ShapeFilter(categories=0x1)
-    SPACE.add(body, shape)
-
-    OBJECT_COLORS[shape] = color
+    space.add(body, shape)
+    object_colors[shape] = color
     
-    return body, shape
+    return (body, shape), object_colors, space
 
-# Load global variables
-def load_map(name) :
-    global WALLS, BALLS, BALL, BALL_SHAPE, BALL_PARAMS, RIGHT_FLIPPERS, LEFT_FLIPPERS, BASE_FLIPPERS, BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS, WIDTH, HEIGHT
-    with open(os.path.join(SCRIPT_PATH, 'maps', name + '.txt'), 'r') as file:
-        lines = file.readlines()
-        for line in lines:
-            if line[0] == '-' :
-                parts = line.split(' ')
-                function_name = parts[1]
-                parameters = [eval(param) for param in parts[2].split(',')]
-                if function_name == "create_wall":
-                    if (parameters[0],parameters[3],parameters[3],parameters[3]) == (500,1190,553,1190) :
-                        print("FLOOOR")
-                    WALLS.append(create_wall(*parameters))
-                elif function_name == "create_flipper":
-                    checker = parameters.pop()
-                    data = create_flipper(*parameters)
-                    data = (data[0], data[1], parameters)
-                    if checker == 'right_flipper' :
-                        RIGHT_FLIPPERS.append(data)
-                    elif checker == 'left_flipper' :
-                        LEFT_FLIPPERS.append(data)
-                    else :
-                        BASE_FLIPPERS.append(data)
-                elif function_name == "create_ball":
-                    BALLS.append(create_ball(*parameters))
-                elif function_name == "create_triangle" :
-                    TRIANGLES.append(create_triangle(*parameters))
-                    
-            elif line[0] == "#" :
-                parts = line.split(" ")
-                if parts[1] == 'BLOCKADE' :
-                    function_name = parts[3]
-                    parameters = [eval(param) for param in parts[4].split(',')]
-                    BLOCKADE_PARAMS = parameters + [2]
-                    BLOCKADE, BLOCKADE_SHAPE = create_wall(*BLOCKADE_PARAMS)
-                    WALLS.append((BLOCKADE, BLOCKADE_SHAPE))
-                if parts[1] == 'BALL' :
-                    function_name = parts[3]
-                    parameters = [eval(param) for param in parts[4].split(',')]
-                    BALL_PARAMS = parameters + [1]
-                    BALL, BALL_SHAPE = create_ball(*BALL_PARAMS)
-                    BALLS.append((BALL, BALL_SHAPE))
-                if parts[1] == 'OBSTACLE' :
-                    function_name = parts[3]
-                    parameters = [eval(param) for param in parts[4].split(',')]
-                    data = None
-                    if function_name == "create_wall":
-                        print(parameters[-1])
-                        data = create_wall(*parameters)
-                        WALLS.append(data)
-                    if function_name == "create_ball":
-                        data = create_ball(*parameters)
-                        BALLS.append(data)
-                    OBSTACLES.append(data)
-            elif line[0] == '%' : continue
-            else :
-                parts = line.split('#')
-                if parts[0] == ' \n' or parts[0] == '\n' : continue
-                var_value = 0
-                if parts[0] == 'inf ' :
-                    var_value = float('inf')
-                else : var_value = eval(parts[0])
-                var_name = parts[1].split(' ')[-2]
-                globals()[var_name] = var_value
-    print(WIDTH, HEIGHT)
-                
-
-
-def replace_base_flippers() :
-    global BASE_FLIPPERS
+def create_flipper(length, angle, position, side, color, elast, object_colors = None, space = None) :
     
-    for i in range(len(BASE_FLIPPERS)) :
-        BASE_FLIPPER, BASE_FLIPPER_SHAPE, BASE_FLIPPER_PARAMS = BASE_FLIPPERS[i]
-        SPACE.remove(BASE_FLIPPER)
-        SPACE.remove(BASE_FLIPPER_SHAPE)
-        BASE_FLIPPER, BASE_FLIPPER_SHAPE = create_flipper(*BASE_FLIPPER_PARAMS)
-        BASE_FLIPPERS[i] = BASE_FLIPPER, BASE_FLIPPER_SHAPE, BASE_FLIPPER_PARAMS
+    points = generate_flipper_points(length, angle)
     
-    return BASE_FLIPPERS
+    mass = poly_field(points)
+    moment = pymunk.moment_for_poly(mass, points)
+
+    if side == 'left' :
+        for i in range(len(points)) : points[i] = (-points[i][0],points[i][1])
     
-    # return base_right_flipper_body, base_right_flipper_shape, base_left_flipper_body, base_left_flipper_shape
+    flipper_body = pymunk.Body(mass, moment)
+    flipper_body.position = position
+    flipper_shape = pymunk.Poly(flipper_body, points)
+    flipper_shape.elasticity = elast
+    flipper_shape.filter = pymunk.ShapeFilter(categories=0x2)
+    space.add(flipper_body, flipper_shape)
 
-def destroy_blockade() :
-    global BLOCKADE, BLOCKADE_SHAPE, SPACE
-    if BLOCKADE is not None:
-        SPACE.remove(BLOCKADE)
-        BLOCKADE = None
-    if BLOCKADE_SHAPE is not None:
-        SPACE.remove(BLOCKADE_SHAPE)
-        BLOCKADE_SHAPE = None
+    object_colors[flipper_shape] = color
+
+    return (flipper_body, flipper_shape), object_colors, space
 
 
-    # return create_wall(start_pos = (base_width, 0), end_pos = breaking_point,color = WHITE)
+circle_field = lambda r : np.pi * r**2
 
-def summon_blockade() :
-    global BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS
-    BLOCKADE, BLOCKADE_SHAPE = create_wall(*BLOCKADE_PARAMS)
-    return BLOCKADE, BLOCKADE_SHAPE
-
-def spawn_ball() :
-    global BALL_PARAMS, BASE_FLIPPERS
-    destroy_blockade()
-    BASE_FLIPPERS = replace_base_flippers()
-    return create_ball(*BALL_PARAMS)
-
-def draw_circle(body, shape) :
-    pos = body.position
-    radius = shape.radius
-    pygame.draw.circle(SCREEN, OBJECT_COLORS[shape], (int(pos.x), int(pos.y)), int(radius), 0)
-
-def draw_segment(body,shape) :
-    a = shape.a
-    b = shape.b
-    w = int(shape.radius)
-    pygame.draw.line(SCREEN, OBJECT_COLORS[shape], a, b, 2*w + 1)
-
-def draw_polygon(body, shape):
-    vertices = shape.get_vertices()
-    transformed_vertices = [body.local_to_world(vertex) for vertex in vertices]
-    pygame.draw.polygon(SCREEN, OBJECT_COLORS[shape], transformed_vertices, 0)
-
-def draw_text_inside(surface, text, pos, color, font_size=24):
-    font = pygame.font.SysFont(None, font_size)
-    text_surface = font.render(text, True, color)
-    surface.blit(text_surface, pos)
+def run(preset="fancy", player_name = "Unknown", screen = None) :
     
-def is_inside(position,wid = WIDTH, hei = HEIGHT) :
-    x,y = position
-    if x < BALL_RADIUS : return False
-    if x > wid - BALL_RADIUS : return False
-    if y < BALL_RADIUS : return False
-    if y > hei - BALL_RADIUS : return False
-    return True
-
-
-def in_tunnel() :
-    global BALL, BASE_WIDTH
-    if BASE_WIDTH < BALL.position[0] : return True
-    return False
-
-STATE = []
-
-def run(preset="fancy"):
-    import threading
-    thread = threading.Thread(target=resume.run_resume_menu)
-    global BALL, BALL_SHAPE, BLOCKADE, BLOCKADE_SHAPE, POINTS, BASE_WIDTH, TUNNEL_SIZE, WIDTH, breaking_point, BASE_FLIPPERS, WALLS, OBSTACLES, LAUNCH_ENERGY
     print("RUNNING WITH PRESET", preset)
-    menu.quit_menu()
-    load_map(preset)
-    SPACE.gravity = GRAVITY_X, GRAVITY_Y
-    destroy_blockade()
-    BASE_WIDTH = WIDTH
-    TUNNEL_SIZE = (2.2 * BALL_RADIUS)
-    WIDTH = int(round(WIDTH + (3 / 2) * WALL_WIDTH + TUNNEL_SIZE))
-    breaking_point = (BASE_WIDTH, 2 * WALL_WIDTH + 3 * BALL_RADIUS)
-    
-    pygame.init()
-    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 
-    for _, shape in WALLS:
+    with open(os.path.join(SCRIPT_PATH, "maps", preset + ".json"), 'r') as file :
+        config = json.load(file)
+
+    BASE_WIDTH = config["BASE_WIDTH"]
+    WIDTH = config["WIDTH"]
+    HEIGHT = config["HEIGHT"]
+    NO_BALLS = config["NO_BALLS"]
+    TARGET_ANGLE = config["TARGET_ANGLE"]
+    BALL_RADIUS = config["BALL_RADIUS"]
+    WALL_WIDTH = config["WALL_WIDTH"]
+    TARGET_HEIGHT = config["TARGET_HEIGHT"]
+    REACTION_TIME = config["REACTION_TIME"]
+    
+    POINTS = 0
+    
+    RUNNING = True
+    rainbow_mode = False
+    epilepsy_mode = False
+
+    space = pymunk.Space()
+    space.gravity = config["GRAVITY"]
+    
+    object_colors = {}
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    
+    field_max = float('-inf')
+    field_min = float('inf')
+    
+    OBSTACLES = []
+    for arguments in config["OBSTACLES"] :
+        data, object_colors, space = create_ball(*arguments, object_colors, space)
+        OBSTACLES.append(data)
+        field = circle_field(arguments[0])
+        field_max = max(field_max, field)
+        field_min = min(field_min, field)
+    field_min = max(field_min, 100)
+    
+    point_function = lambda x : (field_min + field_max - x) / 10
+        
+    BALLS = []
+    for arguments in config["BALLS"] :
+        data, object_colors, space = create_ball(*arguments, object_colors, space)
+        BALLS.append(data)
+        
+    WALLS = []
+    for arguments in config["WALLS"] :
+        data, object_colors, space = create_wall(*arguments, object_colors, space)
+        WALLS.append(data)
+        
+    TRIANGLES = []
+    for arguments in config["TRIANGLES"] :
+        data, object_colors, space = create_triangle(*arguments, object_colors, space)
+        TRIANGLES.append(data)
+        
+    RIGHT_FLIPPERS = []
+    for arguments in config["RIGHT_FLIPPERS"] :
+        data, object_colors, space = create_flipper(*arguments, object_colors, space)
+        RIGHT_FLIPPERS.append(data)
+        
+    LEFT_FLIPPERS = []
+    for arguments in config["LEFT_FLIPPERS"] :
+        data, object_colors, space = create_flipper(*arguments, object_colors, space)
+        LEFT_FLIPPERS.append(data)
+
+    INITIAL_HEIGHT = 0
+    
+    POINTERS = []
+    for arguments in config["POINTERS"] :
+        data, object_colors, space = create_ball(*arguments, object_colors, space)
+        INITIAL_HEIGHT = arguments[1][1]
+        POINTERS.append(data)
+        
+    BALL_PARAMS = config["MAIN_BALL"]
+    (BALL, BALL_SHAPE), object_colors, space = create_ball(*BALL_PARAMS, object_colors, space)
+        
+    BLOCKADE_PARAMS = config["BLOCKADE"]
+    (BLOCKADE, BLOCKADE_SHAPE), object_colors, space = create_wall(*BLOCKADE_PARAMS, object_colors, space)
+    
+    def draw_circle(body, shape) :
+        nonlocal screen, object_colors, rainbow_mode
+        color = object_colors[shape]
+        if rainbow_mode : color = rand_color()
+        pos = body.position
+        radius = shape.radius
+        pygame.draw.circle(screen, color, (int(pos.x), int(pos.y)), int(radius), 0)
+
+    def draw_polygon(body, shape):
+        nonlocal screen, object_colors, rainbow_mode, WALLS
+        color = object_colors[shape]
+        if rainbow_mode and (tuple(color) != WHITE) : color = rand_color()
+        vertices = shape.get_vertices()
+        transformed_vertices = [body.local_to_world(vertex) for vertex in vertices]
+        pygame.draw.polygon(screen, color, transformed_vertices, 0)
+
+    def draw_text(surface, text, pos, color, font_size=24):
+        nonlocal rainbow_mode, WIDTH, HEIGHT
+        if rainbow_mode:
+            color = rand_color()
+        font = pygame.font.SysFont(None, font_size)
+        text_surface = font.render(text, True, color)
+        text_width, text_height = text_surface.get_size()
+        x,y = pos
+        
+        x = min(max(x, text_width // 2), WIDTH - (text_width // 2))
+        y = min(max(y, text_height // 2), HEIGHT - (text_height // 2))
+        
+        pos = (x,y)
+        text_rect = text_surface.get_rect()
+        text_rect.center = pos  # Ustawienie środka tekstu na pozycji pos
+        surface.blit(text_surface, text_rect.topleft)
+                
+    def destroy_blockade() :
+        nonlocal BLOCKADE, BLOCKADE_SHAPE, space
+        if BLOCKADE is not None:
+            space.remove(BLOCKADE)
+            BLOCKADE = None
+        if BLOCKADE_SHAPE is not None:
+            space.remove(BLOCKADE_SHAPE)
+            BLOCKADE_SHAPE = None
+        return space
+
+    def summon_blockade() :
+        nonlocal BLOCKADE, BLOCKADE_SHAPE, BLOCKADE_PARAMS, object_colors, space
+        (BLOCKADE, BLOCKADE_SHAPE), object_colors, space = create_wall(*BLOCKADE_PARAMS, object_colors, space)
+        return BLOCKADE, BLOCKADE_SHAPE, object_colors, space
+
+    def spawn_ball() :
+        nonlocal BALL_PARAMS, object_colors, space
+        
+        space = destroy_blockade()
+        return create_ball(*BALL_PARAMS, object_colors, space)
+
+    def is_inside(wid = WIDTH, hei = HEIGHT) :
+        nonlocal BALL
+        x,y = BALL.position
+        if x < BALL_RADIUS : return False
+        if x > wid - BALL_RADIUS : return False
+        if y < BALL_RADIUS : return False
+        if y > hei + 2*BALL_RADIUS : return False
+        return True
+
+
+    def in_tunnel() :
+        nonlocal BALL, BASE_WIDTH
+        if BASE_WIDTH - 2*BALL_RADIUS - WALL_WIDTH < BALL.position[0] : return True
+        return False
+    
+    def at_start() :
+        nonlocal BALL, config
+        
+        if distance_points(config["BALL_POSITION"], BALL.position) > config["TUNNEL_SIZE"] :
+            return False
+        return True
+    
+    def add_points(val) :
+        nonlocal POINTS
+        POINTS += val
+        print("+", val, "POINTS!!")
+    
+    
+    for _, shape in WALLS + TRIANGLES:
         shape.filter = pymunk.ShapeFilter(mask=pymunk.ShapeFilter.ALL_MASKS() & ~0x2)
+        
+    def not_paused() :
+        nonlocal paused
+        paused = False
+        
+    PAUSE_LAYOUT = pause.generate_pause_menu_layout({"continue": not_paused, "options": pause.options_menu, "menu": pause.back_to_main_menu}, BASE_WIDTH, HEIGHT)
 
     removed = 0
 
@@ -385,96 +297,68 @@ def run(preset="fancy"):
     i = 0
     avg_time = 0
     avg_fps = 0
+    val = 1/model_fps
 
     right_flipper_pressed = False
     left_flipper_pressed = False
-    base_flipper_pressed = False
+    space_pressed = False
 
-    max_energy = LAUNCH_ENERGY
+    max_energy = config["LAUNCH_ENERGY"]
     energy_stored = 0
     energy_direction = 1
     time_passed = 0
     max_time_passing = 1
-    shoot = False
-
-    inside = False
     
-    paused = False
-
-    RUNNING = True
-    import threading
-
-    while RUNNING:
+    paused = False  
+    speed = 1
+    
+    blocked = False
+    destroy_blockade()
+    
+    while RUNNING :
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 RUNNING = False
+                break
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
+                if event.key == pygame.K_RIGHT and not paused:
                     right_flipper_pressed = True
-                elif event.key == pygame.K_LEFT:
+                elif event.key == pygame.K_LEFT and not paused:
                     left_flipper_pressed = True
-                elif event.key == pygame.K_SPACE:
-                    base_flipper_pressed = True
-                    energy_stored = 0
+                elif event.key == pygame.K_SPACE and not paused:
+                    if at_start() :
+                        space_pressed = True
                 elif event.key == pygame.K_ESCAPE :
                     paused = not paused
-                    if paused:
-                        thread.start()
-                        thread.join()
-
-            elif event.type == pygame.KEYUP:
+            elif event.type == pygame.KEYUP and not paused:
                 if event.key == pygame.K_RIGHT:
                     right_flipper_pressed = False
                 elif event.key == pygame.K_LEFT:
                     left_flipper_pressed = False
                 elif event.key == pygame.K_SPACE:
-                    base_flipper_pressed = False
-                    shoot = True
-                    print(shoot)
-
+                    if at_start() :
+                        BALL.apply_impulse_at_local_point((0, -1_000*energy_stored))
+                    space_pressed = False
+                elif event.key == pygame.K_c:
+                    object_colors[BALL_SHAPE] = rand_color()
+                    BALL_PARAMS[4] = object_colors[BALL_SHAPE]
+                elif event.key == pygame.K_r:
+                    rainbow_mode = not rainbow_mode
+                elif event.key == pygame.K_t:
+                    epilepsy_mode = not epilepsy_mode
+                elif event.key == pygame.K_q:
+                    speed *= 2
+                elif event.key == pygame.K_e:
+                    speed /= 2 
+            if paused :
+                for button in PAUSE_LAYOUT.values():
+                    button.handle_event(event, screen, pause.BACKGROUND_COLOR)
+        if not RUNNING : break
+        
         # Wyczyszczenie ekranu
-        SCREEN.fill(BLACK)
-
-        if base_flipper_pressed:
-            print(energy_stored)
-            val = avg_time / 0.75
-            energy_stored += max_energy * val * energy_direction
-            if energy_stored >= max_energy:
-                energy_stored = max_energy
-                time_passed += avg_time
-                if time_passed >= max_time_passing:
-                    time_passed = 0
-                    energy_direction = -1
-            if energy_stored <= 0:
-                energy_stored = 0
-                time_passed += avg_time
-                if time_passed >= max_time_passing:
-                    time_passed = 0
-                    energy_direction = 1
-
-        right_flipper_target_angle = TARGET_ANGLE if right_flipper_pressed else 0
-        left_flipper_target_angle = -TARGET_ANGLE if left_flipper_pressed else 0
-        base_flipper_target_angle = -TARGET_ANGLE if shoot else 0
-
-        if shoot:
-            time_passed += avg_time
-            if time_passed >= 0.5:
-                shoot = False
-                BASE_FLIPPERS = replace_base_flippers()
-                for _, shape in WALLS:
-                    shape.filter = pymunk.ShapeFilter(mask=pymunk.ShapeFilter.ALL_MASKS() & ~0x2)
-                time_passed = 0
-
-        for right_flipper_body, _, _ in RIGHT_FLIPPERS:
-            right_flipper_body.velocity = 0, 0
-            right_flipper_body.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
-        for left_flipper_body, _, _ in LEFT_FLIPPERS:
-            left_flipper_body.velocity = 0, 0
-            left_flipper_body.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
-        for base_flipper_body, _, _ in BASE_FLIPPERS:
-            base_flipper_body.velocity = 0, 0
-            base_flipper_body.angular_velocity = (base_flipper_target_angle - base_flipper_body.angle) * (energy_stored)
-
+        if epilepsy_mode : screen.fill(random.choice([WHITE, BLACK]))
+        else : screen.fill(BLACK)
+        
         # Ustawienie limitu FPS
         clock.tick(model_fps)
         fps = clock.get_fps()
@@ -487,66 +371,125 @@ def run(preset="fancy"):
 
         # Symulacja
         if not paused :
-            SPACE.step(val)
-        else:
-            continue
+            val *= speed
+            space.step(val)
+        else :
+            for button in PAUSE_LAYOUT.values():
+                button.draw(screen)
+        
+        value = avg_time / (REACTION_TIME / speed)
+        if space_pressed :
+            # print(energy_stored)
+            energy_stored += max_energy * value * energy_direction
+            print(energy_stored)
+            
+            if energy_stored >= max_energy:
+                energy_stored = max_energy
+                time_passed += avg_time
+                if time_passed >= max_time_passing:
+                    time_passed = 0
+                    energy_direction = -1
+            if energy_stored <= 0:
+                energy_stored = 0
+                time_passed += avg_time
+                if time_passed >= max_time_passing:
+                    time_passed = 0
+                    energy_direction = 1
+            energy_part = energy_stored / max_energy
+            pointer_height = INITIAL_HEIGHT - ((INITIAL_HEIGHT - TARGET_HEIGHT))*energy_part
+            
+            for pointer,_ in POINTERS :
+                pointer.position = (pointer.position[0], pointer_height)
+        else :
+            if energy_stored > 0 :
+                energy_direction = -1
+                energy_stored += max_energy * value * energy_direction
+                energy_stored = max(energy_stored, 0)
+                energy_part = energy_stored / max_energy
+                pointer_height = INITIAL_HEIGHT - ((INITIAL_HEIGHT - TARGET_HEIGHT))*energy_part
+                
+                for pointer,_ in POINTERS :
+                    pointer.position =    (pointer.position[0], pointer_height)
+    
+        right_flipper_target_angle = TARGET_ANGLE if right_flipper_pressed else 0
+        left_flipper_target_angle = -TARGET_ANGLE if left_flipper_pressed else 0
+    
 
+        for right_flipper_body, _ in RIGHT_FLIPPERS:
+            right_flipper_body.velocity = 0, 0
+            right_flipper_body.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
+        for left_flipper_body, _ in LEFT_FLIPPERS:
+            left_flipper_body.velocity = 0, 0
+            left_flipper_body.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30  
+        
+        
+        if not in_tunnel() and not blocked :
+            add_points(int(round(energy_stored*10)))
+            summon_blockade()
+            blocked = True
+        if not is_inside() :
+            space.remove(BALL)
+            space.remove(BALL_SHAPE)
+            removed += 1
+            if removed == NO_BALLS : RUNNING = False
+            (BALL, BALL_SHAPE), object_colors, space = spawn_ball()
+            blocked = False
+        if not RUNNING : break
+            
+        
         # Rysowanie obiektów
-        for body in SPACE.bodies:
-            if any(body in data for data in BASE_FLIPPERS) : continue
+        for body in space.bodies:
             for shape in body.shapes:
                 if isinstance(shape, pymunk.Circle):
-                    pos = body.position
-                    if not inside and body == BALL:
-                        if is_inside(pos, BASE_WIDTH):
-                            BLOCKADE, BLOCKADE_SHAPE = summon_blockade()
-                            POINTS += round(energy_stored)
-                            inside = True
-                    if not is_inside(pos, wid=WIDTH, hei=HEIGHT):
-                        SPACE.remove(body)
-                        SPACE.remove(shape)
-                        print("REMOVED")
-                        removed += 1
-                        inside = False
-                        BALL, BALL_SHAPE = spawn_ball()
-                        if removed == NO_BALLS:
-                            print("ALL GONE")
-                            RUNNING = False
                     draw_circle(body, shape)
-                elif isinstance(shape, pymunk.Segment):
-                    draw_segment(body, shape)
                 elif isinstance(shape, pymunk.Poly):
                     draw_polygon(body, shape)
 
                 # Check for collisions with the ball
                 if (body, shape) in OBSTACLES :
                     if in_tunnel() : continue
-                    _,_,dist = shortest_distance_between_shapes(BALL_SHAPE, shape)
-                    if dist < 3*BALL_RADIUS :
-                        if shape in POINTS_SET :
-                            print("+",POINTS_SET[shape],"POINTS!")
-                            POINTS += POINTS_SET[shape]
-                        else :
-                            print("+ 10 POINTS!")
-                            POINTS += 10
+                    dist = shortest_distance(BALL_SHAPE, shape)
+                    if dist <= BALL_RADIUS//10 :
+                        add_points(int(round(point_function(circle_field(shape.radius)))))
+            
 
         # Wyświetlanie licznika FPS
-        draw_text_inside(SCREEN, f"FPS: {int(clock.get_fps())}", (0, 0), BLACK)
-        draw_text_inside(SCREEN, f"Balls left: {NO_BALLS - removed}", (0, HEIGHT - 14), BLACK)
-        draw_text_inside(SCREEN, f"{POINTS}", (WIDTH // 2, 0), BLACK)
-        # draw_text(screen, f"AVG_FPS: {int(avg_fps)}", (200,0), BLACK)
+        text_fps = ""
+        if fps == float('inf') : text_fps = "inf"
+        else : text_fps = int(round(fps))
+        
+        draw_text(screen, f"FPS: {text_fps}", (0, 0), BLACK)
+        draw_text(screen, f"Balls left: {NO_BALLS - removed}", (0, HEIGHT), BLACK)
+        draw_text(screen, f"{POINTS}", (WIDTH // 2, 0), BLACK)
+        draw_text(screen, f"Game speed: {speed}", (WIDTH, HEIGHT), BLACK)
 
-        # Odświeżenie ekranu
         pygame.display.flip()
 
-    # Wyjście z Pygame
-    pygame.quit()
+    
+    if removed == NO_BALLS :
+        print()
+        print("avg_frametime", avg_time)
+        print("avg_fps", round(avg_fps))
+        print("POINTS:", POINTS)
+        
+        with open(os.path.join(SCRIPT_PATH, "leaderboard.json"), 'r') as file :
+            leaderboard = json.load(file)
+            
+        leaderboard["PREVIOUS_PLAYER"] = player_name
 
-    print("avg_frametime", avg_time)
-    print("avg_fps", round(avg_fps))
-    print("POINTS: ", POINTS)
+        if player_name in leaderboard["SCORES"] :
+            leaderboard["SCORES"][player_name] = max(leaderboard["SCORES"][player_name], POINTS)
+        else :
+            leaderboard["SCORES"][player_name] = POINTS
+            
 
+        with open(os.path.join(SCRIPT_PATH, "leaderboard.json"), 'w') as FILE:
+            json.dump(leaderboard, FILE, indent=4)
+
+        menu.run_menu()
+    else :
+        pygame.quit()
 
 if __name__ == "__main__":
+    pygame.init()
     run()
-
