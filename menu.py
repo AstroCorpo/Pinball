@@ -113,5 +113,5 @@ def run_menu(type='main'):
 
     
 if __name__ == "__main__":
-    pygame.init()
-    run_menu()
+    from initialize import main_run
+    main_run()

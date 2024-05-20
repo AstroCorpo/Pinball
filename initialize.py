@@ -6,7 +6,9 @@ os.environ['SDL_AUDIODRIVER'] = 'dummy'
 from menu import run_menu
 import pygame
 
-
-if __name__ == "__main__":
+def main_run() :
     pygame.init()
     run_menu()
+
+if __name__ == "__main__":
+    main_run()

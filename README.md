@@ -13,3 +13,7 @@ Python Project
 | Spotkanie 6 	| Dodatkowe przeszkody opcjon 	| alne, uspraw  	| nione przeszkody bonusowe           	| ❌ 	|
 | Spotkanie 7 	| Usprawnienia i ogólna optym 	| alizacja (Imp 	| lementacjawydajniejszych algorytmów 	| ❌ 	|
 
+
+# Reminders
+Add leaderboard -> add logic to insert player name
+beautify code

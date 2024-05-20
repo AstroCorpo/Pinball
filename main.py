@@ -284,9 +284,13 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         nonlocal paused
         paused = False
         
-    PAUSE_LAYOUT = pause.generate_pause_menu_layout({"continue": not_paused, "options": pause.options_menu, "menu": pause.back_to_main_menu}, BASE_WIDTH, HEIGHT)
+    # PAUSE_LAYOUT = pause.generate_pause_menu_layout({"continue": not_paused, "options": pause.options_menu, "menu": menu.run_menu}, BASE_WIDTH, HEIGHT)
+
+    PAUSE_LAYOUT = pause.generate_pause_menu_layout({"continue": not_paused, "menu": menu.run_menu}, BASE_WIDTH, HEIGHT)
 
     removed = 0
+    
+    display_fire = False
 
     pygame.display.set_caption("Pinball")
     clock = pygame.time.Clock()
@@ -304,6 +308,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
     space_pressed = False
 
     max_energy = config["LAUNCH_ENERGY"]
+    min_energy = config["MINIMAL_ENERGY"]
     energy_stored = 0
     energy_direction = 1
     time_passed = 0
@@ -328,6 +333,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                 elif event.key == pygame.K_SPACE and not paused:
                     if at_start() :
                         space_pressed = True
+                        energy_direction = 1
                 elif event.key == pygame.K_ESCAPE :
                     paused = not paused
             elif event.type == pygame.KEYUP and not paused:
@@ -339,6 +345,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                     if at_start() :
                         BALL.apply_impulse_at_local_point((0, -1_000*energy_stored))
                     space_pressed = False
+                    display_fire = False
                 elif event.key == pygame.K_c:
                     object_colors[BALL_SHAPE] = rand_color()
                     BALL_PARAMS[4] = object_colors[BALL_SHAPE]
@@ -350,6 +357,8 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                     speed *= 2
                 elif event.key == pygame.K_e:
                     speed /= 2 
+                elif event.key == pygame.K_f:
+                    speed = -speed
             if paused :
                 for button in PAUSE_LAYOUT.values():
                     button.handle_event(event, screen, pause.BACKGROUND_COLOR)
@@ -378,10 +387,21 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                 button.draw(screen)
         
         value = avg_time / (REACTION_TIME / speed)
+        energy_stored = max(energy_stored, 0)
+        energy_stored = min(energy_stored, max_energy)
         if space_pressed :
-            # print(energy_stored)
-            energy_stored += max_energy * value * energy_direction
+            if energy_stored >= min_energy :
+                display_fire = True
+            else : display_fire = False
+            
             print(energy_stored)
+            energy_part = energy_stored / max_energy
+            pointer_height = INITIAL_HEIGHT - ((INITIAL_HEIGHT - TARGET_HEIGHT))*energy_part
+            
+            for pointer,_ in POINTERS :
+                pointer.position = (pointer.position[0], pointer_height)
+                
+            energy_stored += max_energy * value * energy_direction
             
             if energy_stored >= max_energy:
                 energy_stored = max_energy
@@ -395,16 +415,10 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                 if time_passed >= max_time_passing:
                     time_passed = 0
                     energy_direction = 1
-            energy_part = energy_stored / max_energy
-            pointer_height = INITIAL_HEIGHT - ((INITIAL_HEIGHT - TARGET_HEIGHT))*energy_part
-            
-            for pointer,_ in POINTERS :
-                pointer.position = (pointer.position[0], pointer_height)
         else :
             if energy_stored > 0 :
                 energy_direction = -1
                 energy_stored += max_energy * value * energy_direction
-                energy_stored = max(energy_stored, 0)
                 energy_part = energy_stored / max_energy
                 pointer_height = INITIAL_HEIGHT - ((INITIAL_HEIGHT - TARGET_HEIGHT))*energy_part
                 
@@ -463,6 +477,9 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         draw_text(screen, f"{POINTS}", (WIDTH // 2, 0), BLACK)
         draw_text(screen, f"Game speed: {speed}", (WIDTH, HEIGHT), BLACK)
 
+        if display_fire :
+            draw_text(screen, "FIRE!", (WIDTH//2, HEIGHT//2), rand_color(), font_size=80)
+
         pygame.display.flip()
 
     
@@ -491,5 +508,5 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         pygame.quit()
 
 if __name__ == "__main__":
-    pygame.init()
-    run()
+    from initialize import main_run
+    main_run()

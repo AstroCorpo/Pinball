@@ -4,13 +4,13 @@ from layouts.button import Button
 from layouts.tools import generate_image
 
 
-BUTTONS = ["continue", "options", "menu"]
+# BUTTONS = ["continue", "options", "menu"]
+BUTTONS = ["continue", "main menu"]
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def generate_pause_menu_layout(actions, WIDTH = 600, HEIGHT = 1000, spacing=10):
     
-
     global BUTTONS, SCRIPT_PATH
 
     max_width = 0
