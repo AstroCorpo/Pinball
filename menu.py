@@ -45,7 +45,7 @@ def key_bindings():
 def back_to_main_menu():
     global LAYOUT
     from layouts.main_menu import generate_main_menu_layout
-    new_layout = generate_main_menu_layout({"play": play, "options": options_menu, "quit": quit_menu})
+    new_layout = generate_main_menu_layout({"play": nick_input_menu, "options": options_menu, "quit": quit_menu})
     LAYOUT = new_layout
 
 def options_menu():
@@ -54,7 +54,13 @@ def options_menu():
     new_layout = generate_options_menu_layout({"menu": back_to_main_menu, "keys": key_bindings, "change_color": change_color})
     LAYOUT = new_layout
 
-def play():
+def nick_input_menu():
+    global LAYOUT
+    from layouts.nick_input_menu import generate_nick_input_menu_layout
+    new_layout = generate_nick_input_menu_layout({"box": selection_menu})
+    LAYOUT = new_layout
+
+def selection_menu():
     global LAYOUT
     from layouts.selection_menu import generate_selection_menu_layout
     new_layout = generate_selection_menu_layout({"map1": run_map1, "map2": run_map2, "map3": run_map3, "back": back_to_main_menu})
@@ -89,12 +95,13 @@ def run_map3():
         
     main.run("third",leaderboard["PREVIOUS_PLAYER"], screen)
 
+
+
 def run_menu(type='main'):
     global screen
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
 
-    # LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": play, "options": options_menu})
-    LAYOUT = generate_nick_input_menu_layout({"box": back_to_main_menu})
+    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": nick_input_menu, "options": options_menu})
 
     flags = pygame.NOFRAME if type != 'main' else 0
 

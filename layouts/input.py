@@ -11,8 +11,8 @@ COLOR_ACTIVE = pg.Color('dodgerblue2')
 
 class InputBox:
     def __init__(self, x, y, action=None, text=''):
-        pg.font.init()  # Initialize the pygame font module
-        self.FONT = pg.font.SysFont("Comic Sans MS", 32)  # Initialize the font in the constructor
+        pg.font.init()
+        self.FONT = pg.font.SysFont("Comic Sans MS", 32)
         self.rect = pg.Rect(x, y, x + 10, y + 20)
         self.color = COLOR_INACTIVE
         self.text = text
@@ -33,10 +33,8 @@ class InputBox:
         if event.type == pg.KEYDOWN:
             if self.active:
                 if event.key == pg.K_RETURN:
-                    print(self.text)
                     player_name = self.text
-                    
-                    
+
                     with open(LEADERBOARD_PATH, 'r') as file :
                         leaderboard = json.load(file)
                         
