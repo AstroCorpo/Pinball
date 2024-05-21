@@ -1,9 +1,6 @@
 import numpy as np
 from collections import deque
 import random
-import pygame
-import ctypes
-from Xlib import display
 
 def generate_flipper_points(d, posterior_angle = 0, density1 = 0, density2 = 0) :
     c_1 = (0,0)

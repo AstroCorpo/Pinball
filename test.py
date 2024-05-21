@@ -8,7 +8,7 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 # Ustawienie wymiarów okna
 # width, height = 2550, 1340
-width, height = 500, 1200
+width, height = 500, 900
 
 DATA = {}
 
@@ -27,6 +27,7 @@ BLACK = (0, 0, 0)
 FLIPPER_LENGTH = 60
 POINTS = 0
 LAUNCH_ENERGY = 75
+MINIMAL_ENERGY = 53
 TUNNEL_SIZE = 2.2*BALL_RADIUS
 REACTION_TIME = 0.75
 
@@ -423,129 +424,140 @@ walls = []
 # START
 
 
-poin = [(base_width // 5 + 10, 10.75*height // 12 - 10), (base_width // 5 + 30 + 10, 10.75*height // 12 + 7 - 10), (base_width // 5 + 10, 10*height // 12 - 10)]
-center_poin = baricenter(poin)
-radius = shortest_in_triangle(poin, center_poin)
-# # print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-# # print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# poin = [(base_width // 5 + 10, 10.75*height // 12 - 10), (base_width // 5 + 30 + 10, 10.75*height // 12 + 7 - 10), (base_width // 5 + 10, 10*height // 12 - 10)]
+# center_poin = baricenter(poin)
+# radius = shortest_in_triangle(poin, center_poin)
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 
-for i in range(3) :
-    prev = center_poin
-    for _ in range(10) :
-        vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
-        vect1 /= distance_points((0,0), vect1)
-        vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
-        radius = shortest_in_triangle(poin, vect1)
-        # # print("# OBSTACLE",end = " ")
-        (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-        # # print("# OBSTACLE",end = " ")
-        (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-        prev = vect1
+# for i in range(3) :
+#     prev = center_poin
+#     for _ in range(10) :
+#         vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
+#         vect1 /= distance_points((0,0), vect1)
+#         vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
+#         radius = shortest_in_triangle(poin, vect1)
+#         # # print("# OBSTACLE",end = " ")
+#         (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+#         # # print("# OBSTACLE",end = " ")
+#         (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+#         prev = vect1
         
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
 
 
-poin = [(WALL_WIDTH, 9*height // 12), (2*WALL_WIDTH, 8.75*height // 12), (WALL_WIDTH, 8.5*height // 12)]
-center_poin = baricenter(poin)
-radius = shortest(center_poin, poin)
+
+# poin = [(WALL_WIDTH, 9*height // 12), (2*WALL_WIDTH, 8.75*height // 12), (WALL_WIDTH, 8.5*height // 12)]
+# center_poin = baricenter(poin)
+# radius = shortest(center_poin, poin)
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+
+
+# for i in range(3) :
+#     prev = center_poin
+#     for _ in range(10) :
+#         vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
+#         vect1 /= distance_points((0,0), vect1)
+#         vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
+#         radius = shortest_in_triangle(poin, vect1)
+#         # # print("# OBSTACLE",end = " ")
+#         (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
+#         # # print("# OBSTACLE",end = " ")
+#         (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
+#         prev = vect1
+
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+
+# poin = [(base_width // 3, 8.75*height // 12)]
+# center_poin = baricenter(poin)
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=center_poin, r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+
+# poin = [(WALL_WIDTH, 7*height // 12), (4*WALL_WIDTH, 6.5*height // 12), (WALL_WIDTH, 6*height // 12)]
+# walls.append(create_triangle(poin, color = WHITE))
+# walls.append(create_triangle(symmetry(poin), color = WHITE))
+
+
+# right_flipper_body2, right_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, symmetry((3.6*WALL_WIDTH, 6.5*height // 12)), 'right', flipper_color)
+# left_flipper_body2, left_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, (3.6*WALL_WIDTH, 6.5*height // 12), 'left', flipper_color)
+
+# walls.append(create_wall(start_pos=(WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12),end_pos=(WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12), static=True, color=WHITE, widt=WALL_WIDTH))
+# walls.append(create_wall(start_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12)),end_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12)), static=True, color=WHITE, widt=WALL_WIDTH))
+
+# poin = [(WALL_WIDTH, 3.25*height // 12), (2*WALL_WIDTH, 3.25*height // 12), (WALL_WIDTH, 3*height // 12)]
+# center_poin = baricenter(poin)
+# radius = shortest(center_poin, poin)
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+# # # print("# OBSTACLE",end = " ")
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+
+# poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.5*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)]
+# center_poin = baricenter(poin)
+# radius = shortest(center_poin, poin)
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
 
-for i in range(3) :
-    prev = center_poin
-    for _ in range(10) :
-        vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
-        vect1 /= distance_points((0,0), vect1)
-        vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
-        radius = shortest_in_triangle(poin, vect1)
-        # # print("# OBSTACLE",end = " ")
-        (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
-        # # print("# OBSTACLE",end = " ")
-        (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
-        prev = vect1
 
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
-
-poin = [(base_width // 3, 8.75*height // 12)]
-center_poin = baricenter(poin)
+# poin = [(3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)]
+# center_poin = baricenter(poin)
+# radius = shortest(center_poin, poin)
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
-
-poin = [(WALL_WIDTH, 7*height // 12), (4*WALL_WIDTH, 6.5*height // 12), (WALL_WIDTH, 6*height // 12)]
-walls.append(create_triangle(poin, color = WHITE))
-walls.append(create_triangle(symmetry(poin), color = WHITE))
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
 
 
-right_flipper_body2, right_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, symmetry((3.6*WALL_WIDTH, 6.5*height // 12)), 'right', flipper_color)
-left_flipper_body2, left_flipper_shape2 = create_flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, (3.6*WALL_WIDTH, 6.5*height // 12), 'left', flipper_color)
-
-walls.append(create_wall(start_pos=(WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12),end_pos=(WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12), static=True, color=WHITE, widt=WALL_WIDTH))
-walls.append(create_wall(start_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 6.5*height // 12)),end_pos=symmetry((WALL_WIDTH + WALL_WIDTH//2, 3.25*height // 12)), static=True, color=WHITE, widt=WALL_WIDTH))
-
-poin = [(WALL_WIDTH, 3.25*height // 12), (2*WALL_WIDTH, 3.25*height // 12), (WALL_WIDTH, 3*height // 12)]
-center_poin = baricenter(poin)
-radius = shortest(center_poin, poin)
+# poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3*height // 12)]
+# center_poin = baricenter(poin)
+# radius = shortest(center_poin, poin)
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
+# (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 # # print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+# (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+# walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
+# walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
 
-poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.5*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)]
-center_poin = baricenter(poin)
-radius = shortest(center_poin, poin)
-# print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
-# print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+# center_poin = (base_width//2, 3*height // 12) 
+# # print("# OBSTACLE",end = " ")
+# (create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 
+# # walls
+# starting = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
+# ending = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12)
+# walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, widt=2*WALL_WIDTH))
+# walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, widt=2*WALL_WIDTH))
 
-poin = [(3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)]
-center_poin = baricenter(poin)
-radius = shortest(center_poin, poin)
-# print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
-# print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+# starting = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)
+# ending = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
+# walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, widt=WALL_WIDTH))
+# walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, widt=WALL_WIDTH))
 
+obstacle_color = rand_color()
 
-poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (4*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12), (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3*height // 12)]
-center_poin = baricenter(poin)
-radius = shortest(center_poin, poin)
-# print("# OBSTACLE",end = " ")
-(create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-# print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
-walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
+walls.append(create_wall(start_pos = (base_width // 2, height // 3), end_pos = (base_width // 2, 2 * height // 3), static = True, color = obstacle_color, widt = WALL_WIDTH))
 
-center_poin = (base_width//2, 3*height // 12) 
-# print("# OBSTACLE",end = " ")
-(create_ball(position=symmetry(center_poin), r = 2*BALL_RADIUS, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+poin = (base_width // 3, height // 4)
 
-# walls
-starting = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
-ending = (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*height // 12)
-walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, widt=2*WALL_WIDTH))
-walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, widt=2*WALL_WIDTH))
-
-starting = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 5.25*height // 12)
-ending = (2.5*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*height // 12)
-walls.append(create_wall(start_pos= starting,end_pos=ending, static=True, color=WHITE, widt=WALL_WIDTH))
-walls.append(create_wall(start_pos=symmetry(starting),end_pos=symmetry(ending), static=True, color=WHITE, widt=WALL_WIDTH))
+(create_ball(position=poin, r = 2*BALL_RADIUS, color=obstacle_color, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
+(create_ball(position=symmetry(poin), r = 2*BALL_RADIUS, color=obstacle_color, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 
 walls.append(create_wall(start_pos=(width - WALL_WIDTH // 2, 0), end_pos=(width - WALL_WIDTH // 2, height), color=WHITE)) # right_wall
 walls.append(create_wall(start_pos=(WALL_WIDTH // 2, 0), end_pos=(WALL_WIDTH // 2, height), color=WHITE)) # left_wall
@@ -710,7 +722,7 @@ while running:
                 time_passed = 0
                 energy_direction = 1
 
-    right_flipper_body.velocity = left_flipper_body.velocity = right_flipper_body2.velocity = left_flipper_body2.velocity = base_right_flipper_body.velocity = 0, 0
+    right_flipper_body.velocity = left_flipper_body.velocity = base_right_flipper_body.velocity = 0, 0
 
     right_flipper_target_angle = target_angle if right_flipper_pressed else 0
     left_flipper_target_angle = -target_angle if left_flipper_pressed else 0
@@ -724,9 +736,9 @@ while running:
             time_passed = 0
 
     right_flipper_body.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
-    right_flipper_body2.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
+    # right_flipper_body2.angular_velocity = (right_flipper_target_angle - right_flipper_body.angle) * 30
     left_flipper_body.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
-    left_flipper_body2.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
+    # left_flipper_body2.angular_velocity = (left_flipper_target_angle - left_flipper_body.angle) * 30
     # base_right_flipper_body.angular_velocity = (base_flipper_target_angle - base_right_flipper_body.angle) * (energy_stored)
 
     
@@ -783,6 +795,7 @@ DATA["NO_BALLS"] = NO_BALLS
 DATA["WALL_WIDTH"] = WALL_WIDTH
 DATA["FLIPPER_LENGTH"] = FLIPPER_LENGTH
 DATA["LAUNCH_ENERGY"] = LAUNCH_ENERGY
+DATA["MINIMAL_ENERGY"] =  MINIMAL_ENERGY
 DATA["TUNNEL_SIZE"] = TUNNEL_SIZE
 DATA["REACTION_TIME"] = REACTION_TIME
 DATA["BASE_WIDTH"] = base_width
@@ -812,5 +825,5 @@ print(len(DATA))
 import json
 
 
-with open(os.path.join(SCRIPT_PATH, "maps", "fancy.json"), 'w') as FILE:
+with open(os.path.join(SCRIPT_PATH, "maps", "default.json"), 'w') as FILE:
     json.dump(DATA, FILE, indent=4)
