@@ -1,14 +1,15 @@
 import pygame
 import os
 from layouts.button import Button
+from layouts.input import InputBox
 from layouts.tools import generate_image
 
-
-BUTTONS = ["menu", "change_color", "keys"]
+INPUTS = ["input"]
+BUTTONS = []
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-def generate_options_menu_layout(actions, spacing=10):
+def generate_nick_input_menu_layout(actions, spacing=10):
     WIDTH = 600
 
     global BUTTONS, SCRIPT_PATH
@@ -33,10 +34,9 @@ def generate_options_menu_layout(actions, spacing=10):
     WIDTH = max(WIDTH, max_width)
 
     start = spacing
-    for name in BUTTONS:
-        img = layout[name]
-        img_width, img_height = img.get_width(), img.get_height()
-        layout[name] = Button(img, (WIDTH // 2) - (img_width // 2), start, action=actions.get(name))
-        start += img_height + spacing
+
+    for name in INPUTS:
+        layout[name] = InputBox(WIDTH // 2 - 100, start, action=actions.get("box"))
+        start += 10 + spacing
 
     return layout

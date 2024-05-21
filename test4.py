@@ -23,6 +23,7 @@ class Button:
         surface.blit(self.image, self.rect)
 
     def handle_event(self, event, screen, background_color):
+        print("a")
         if event.type == pygame.MOUSEBUTTONDOWN:
             screen.fill(background_color)
             if self.rect.collidepoint(event.pos):
@@ -81,7 +82,7 @@ def run_menu(type='main'):
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
 
     LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": play, "options": options_menu})
-    # LAYOUT = generate_nick_input_menu_layout({"box": back_to_main_menu})
+    # LAYOUT = generate_nick_input_menu_layout()
 
     flags = pygame.NOFRAME if type != 'main' else 0
 
@@ -104,7 +105,10 @@ def run_menu(type='main'):
                 quit_menu()
                 break
             for button in LAYOUT.values():
-                button.handle_event(event, screen, BACKGROUND_COLOR)
+                if isinstance(button, Button):
+                    button.handle_event(event, screen, BACKGROUND_COLOR)
+                if isinstance(button, InputBox):
+                    button.handle_event(event)
         if not RUNNING:
             break
 
