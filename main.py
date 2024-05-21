@@ -4,6 +4,7 @@ os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 os.environ['SDL_AUDIODRIVER'] = 'dummy'
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
+LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 import random
 import pymunk
 import numpy as np
@@ -489,7 +490,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         print("avg_fps", round(avg_fps))
         print("POINTS:", POINTS)
         
-        with open(os.path.join(SCRIPT_PATH, "leaderboard.json"), 'r') as file :
+        with open(LEADERBOARD_PATH, 'r') as file :
             leaderboard = json.load(file)
             
         leaderboard["PREVIOUS_PLAYER"] = player_name
@@ -499,8 +500,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         else :
             leaderboard["SCORES"][player_name] = POINTS
             
-
-        with open(os.path.join(SCRIPT_PATH, "leaderboard.json"), 'w') as FILE:
+        with open(LEADERBOARD_PATH, 'w') as FILE:
             json.dump(leaderboard, FILE, indent=4)
 
         menu.run_menu()

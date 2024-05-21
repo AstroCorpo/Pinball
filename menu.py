@@ -1,8 +1,11 @@
 print("running menu.py")
 import pygame, os
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 from layouts.main_menu import generate_main_menu_layout
 from layouts.nick_input_menu import generate_nick_input_menu_layout
 import main
+import json
 
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -66,22 +69,32 @@ def change_color():
 
 def run_map1():
     global screen
-    main.run("default","player1", screen)
+    
+    with open(LEADERBOARD_PATH, 'r') as file :
+        leaderboard = json.load(file)
+        
+    main.run("default",leaderboard["PREVIOUS_PLAYER"], screen)
 
 def run_map2():
     global screen
-    main.run("fancy","player1", screen)
+    with open(LEADERBOARD_PATH, 'r') as file :
+        leaderboard = json.load(file)
+        
+    main.run("fancy",leaderboard["PREVIOUS_PLAYER"], screen)
 
 def run_map3():
     global screen
-    main.run("third","player1", screen)
+    with open(LEADERBOARD_PATH, 'r') as file :
+        leaderboard = json.load(file)
+        
+    main.run("third",leaderboard["PREVIOUS_PLAYER"], screen)
 
 def run_menu(type='main'):
     global screen
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
 
-    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": play, "options": options_menu})
-    # LAYOUT = generate_nick_input_menu_layout({"box": back_to_main_menu})
+    # LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": play, "options": options_menu})
+    LAYOUT = generate_nick_input_menu_layout({"box": back_to_main_menu})
 
     flags = pygame.NOFRAME if type != 'main' else 0
 

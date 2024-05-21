@@ -1,4 +1,9 @@
+import os
+import json
 import pygame as pg
+
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "leaderboard.json")
 
 
 COLOR_INACTIVE = pg.Color('lightskyblue3')
@@ -29,6 +34,17 @@ class InputBox:
             if self.active:
                 if event.key == pg.K_RETURN:
                     print(self.text)
+                    player_name = self.text
+                    
+                    
+                    with open(LEADERBOARD_PATH, 'r') as file :
+                        leaderboard = json.load(file)
+                        
+                    leaderboard["PREVIOUS_PLAYER"] = player_name
+
+                    with open(LEADERBOARD_PATH, 'w') as FILE:
+                        json.dump(leaderboard, FILE, indent=4)
+                    
                     screen.fill(BACKGROUND_COLOR)
                     self.text = ''
                     self.action()
