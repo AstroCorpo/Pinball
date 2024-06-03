@@ -1,1 +1,1 @@
-sound
+epilepsy_mode

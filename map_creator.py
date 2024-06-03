@@ -12,6 +12,7 @@ import json
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 SOUND_PATH = os.path.join(SCRIPT_PATH, "sounds")
 
+
 POINTS = 0
 
 VOLUME = 0.5
@@ -41,7 +42,7 @@ class Object:
         self.collision_sound = None
         if collision_sound_file is not None:
             self.collision_sound = create_sound(collision_sound_file)
-    
+        
     def summon(self, space=None):
         if space is None:
             space = self.space
@@ -49,6 +50,7 @@ class Object:
             space.add(self.body, self.shape)
         except :
             print("Couldn't add this to space")
+    
     def destroy(self):
         try :
             self.space.remove(self.body)
@@ -58,7 +60,7 @@ class Object:
             self.space.remove(self.shape)
         except :
             print("Exception occured while trying to destroy object", self.shape)
-            
+    
 
     def draw(self, screen, rainbow_mode=False):
         color = self.color
@@ -88,7 +90,7 @@ class Object:
 
 class Ball(Object):
     global BALLS
-    def __init__(self, r, position, static=False, mass=None, color=rand_color(), game_points = 0, elast=0.5, collision_sound_file=None, add = True, space=None):
+    def __init__(self, r, position, static=False, mass=None, color=rand_color(), game_points = 0, elast=0.5, collision_sound_file=None, effects = [], add = True, space=None):
         super().__init__(color, game_points, collision_sound_file, space)
         if static:
             self.body = pymunk.Body(body_type=pymunk.Body.STATIC)
@@ -105,20 +107,32 @@ class Ball(Object):
         self.shape.collision_type = BALL_COLLISION_TYPE
         if add :
             self.shape.collision_type = OBSTACLE_COLLISTION_TYPE
-            BALLS.append((r, position, static, mass, color, game_points, elast, collision_sound_file))
+            BALLS.append((r, position, static, mass, color, game_points, elast, collision_sound_file, effects))
         
+        self.effects = {}
+        
+        self.effects["slow"] = [-1, 2]
+        self.effects["epilepsy"] = [-1]
+        self.effects["rainbow"] = [-1]
+        
+        for effect in effects :
+            print(effect[1])
+            self.effects[effect[0]] = effect[1]
+        if effects != [] :
+            print(self.effects)
+            
         self.summon()
 
 
 class Poly(Object):
     global POLYS
     def __init__(self, points, position = None, mass=None, moment=None, color=rand_color(), game_points = 0, frict=0.5, elast=0.5, static=True, collision_sound_file=None, addition = False, space=None):
+        super().__init__(color, game_points, collision_sound_file, space)
         
         if position == None :
             position = (sum([point[0] for point in points]) / len(points), sum([point[1] for point in points]) / len(points))
             points = [(point[0] - position[0], point[1] - position[1]) for point in points]
             
-        super().__init__(color, game_points, collision_sound_file, space)
         mass = pymunk.moment_for_poly(1, points) if mass is None else mass
         moment = pymunk.moment_for_poly(mass, points) if moment is None else moment
         
@@ -166,7 +180,7 @@ class Wall(Poly):
 
 class Flipper(Poly):
     global FLIPPERS
-    def __init__(self, length, angle, position, side = "right", color = rand_color(), game_points = 0, elast = 0.7, space=None):
+    def __init__(self, length, angle, position, side = "right", color = rand_color(), game_points = 0, elast = 0.7, collision_sound_file = None, space=None):
         points = generate_flipper_points(length, angle)
         self.side = side
         if side == "left":
@@ -175,19 +189,11 @@ class Flipper(Poly):
         mass = poly_field(points)
         moment = pymunk.moment_for_poly(mass, points)
         
-        super().__init__(points = points, position = position, mass=mass, moment=moment, color=color, game_points = game_points, elast=elast, static=False, space=space)
+        super().__init__(points = points, position = position, mass=mass, moment=moment, color=color, game_points = game_points, elast=elast, static=False, collision_sound_file = collision_sound_file, space=space)
         self.body.position = position
         self.shape.filter = pymunk.ShapeFilter(categories=0x2)
         self.summon()
         FLIPPERS.append((length, angle, position, side, color, game_points, elast))
-
-def ball_collision_handler(arbiter, space, data):
-    other_shape = arbiter.shapes[1]
-    other_shape.data.collision()
-    return True
-
-def poly_collision_handler(arbiter, space, data):
-    return False
 
 
 def run(preset_name = "default"):
@@ -231,19 +237,6 @@ def run(preset_name = "default"):
                 points.append((BASE_WIDTH - poin[0], poin[1]))
             return points
         return BASE_WIDTH - point[0], point[1]
-
-    def baricenter(points) :
-        a, b = 0,0
-        for c,d in points :
-            a += c
-            b += d
-        return (a/len(points), b/(len(points)))
-
-    def shortest(point, points) :
-        dist = float('inf')
-        for poin in points :
-            dist = min(dist,distance_points(point, poin))
-        return dist
     
     pygame.init()
     pygame.mixer.music.set_volume(0.2)
@@ -271,6 +264,7 @@ def run(preset_name = "default"):
     Wall(start_pos = (BASE_WIDTH, HEIGHT - WALL_WIDTH//2), end_pos = (WIDTH, HEIGHT - WALL_WIDTH//2), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
     Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
     Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    
     # Poly args
     # points, position, mass, moment, color, game_points, frict, elast, static, collision_sound_file, addition = True, space
     poin = [(0, HEIGHT), ((BASE_WIDTH // 2) - BALL_RADIUS, HEIGHT), (0, HEIGHT - 3*BALL_RADIUS)]
@@ -296,7 +290,7 @@ def run(preset_name = "default"):
     
     flipper_color = rand_color()
     # Flipper args
-    # length, angle, position, side, color, game_points, elast
+    # length, angle, position, side, color, game_points, elast, collision_sound_file, space
     # flippers must be in table for proper demo
     flippers = []
     flippers.append(Flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_right, 'right', flipper_color, space = space))
@@ -322,12 +316,21 @@ def run(preset_name = "default"):
 
     obstacle_color = rand_color()
 
-    # Obstacles
     Wall(start_pos = (BASE_WIDTH // 2, HEIGHT // 3), end_pos = (BASE_WIDTH // 2, 2 * HEIGHT // 3), color = obstacle_color, game_points = 200, width = WALL_WIDTH, frict = FRICTION, elast = 2*ELASTICITY, static = True, collision_sound_file = "bell.wav", space = space)
     
     poin = (BASE_WIDTH // 3, HEIGHT // 4)
-    Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", space = space)
-    Ball(position = symmetry(poin), r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", space = space)
+    effects_table = [("epilepsy", [50]), ("slow", (50, 0.5)), ("rainbow", [100])]
+    Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
+    Ball(position = symmetry(poin), r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
+    
+    def ball_collision_handler(arbiter, space, data):
+        other_shape = arbiter.shapes[1]
+        other_shape.data.collision()
+        return True
+
+    def poly_collision_handler(arbiter, space, data):
+        return False
+    
     
     handler = space.add_collision_handler(BALL_COLLISION_TYPE, POLY_COLLISION_TYPE)
     handler.begin = ball_collision_handler
@@ -338,9 +341,6 @@ def run(preset_name = "default"):
 
     def at_start() :
         nonlocal BALL
-        
-        # if distance_points(config["BALL_POSITION"], BALL.position) > config["TUNNEL_SIZE"] :
-        #     return False
         
         if distance_points(BALL_POSITION, BALL.body.position) > TUNNEL_SIZE :
             return False
@@ -380,7 +380,7 @@ def run(preset_name = "default"):
         
         pos = (x,y)
         text_rect = text_surface.get_rect()
-        text_rect.center = pos  # Ustawienie środka tekstu na pozycji pos
+        text_rect.center = pos
         surface.blit(text_surface, text_rect.topleft)
     
     
@@ -405,8 +405,6 @@ def run(preset_name = "default"):
     left_pressed = False
     space_pressed = False
 
-    # max_energy = config["LAUNCH_ENERGY"]
-    # min_energy = config["MINIMAL_ENERGY"]
     max_energy = LAUNCH_ENERGY
     min_energy = MINIMAL_ENERGY
     energy_stored = 0
@@ -421,6 +419,8 @@ def run(preset_name = "default"):
     BLOCKADE.destroy()
     epilepsy_mode = False
     rainbow_mode = False
+    
+    eps = 0.001
     
     RUNNING = True
     
@@ -469,11 +469,13 @@ def run(preset_name = "default"):
                 for button in PAUSE_LAYOUT.values():
                     button.handle_event(event, screen, pause.BACKGROUND_COLOR)
         if not RUNNING : break
-
+        if speed >= 0 :
+            speed = max(speed, eps)
+        else :
+            speed = min(speed, eps)
         if epilepsy_mode : screen.fill(random.choice([WHITE, BLACK]))
         else : screen.fill(BLACK)
 
-        # Ustawienie limitu FPS
         clock.tick(model_fps)
         fps = clock.get_fps()
         val = 1 / model_fps
@@ -483,15 +485,38 @@ def run(preset_name = "default"):
         avg_time = ((avg_time * i) + val) / (i + 1)
         avg_fps = ((avg_fps * i) + fps) / (i + 1)
 
-        
+        epilepsy_possibility = False
+        slow_possibility = False
+        slow_value = 1
+        rainbow_possibility = False
         for body in space.bodies:
             if not is_inside(body) :
                 shape.data.destroy()
                 del(shape.data)
             for shape in body.shapes:
                 shape.data.draw(screen, rainbow_mode)
-                
-        # Symulacja
+                if not isinstance(shape, pymunk.Circle) : continue
+                if shape == BALL.shape : continue
+                dist = shortest_distance(shape, BALL.shape)
+                for effect in shape.data.effects :
+                    effect_dist = shape.data.effects[effect][0]
+
+                    if effect == "epilepsy" :
+                        if dist <= effect_dist :
+                            epilepsy_possibility = True
+                    elif effect == "slow" : 
+                        if dist <= effect_dist :
+                            slow_possibility = True
+                            slow_value = shape.data.effects[effect][1]
+                    elif effect == "rainbow" : 
+                        if dist <= effect_dist :
+                            rainbow_possibility = True
+                    
+        epilepsy_mode = epilepsy_possibility
+        rainbow_mode = rainbow_possibility
+        if slow_possibility : speed = slow_value
+        else : speed = 1
+                    
         if not paused :
             val *= speed
             space.step(val)
@@ -579,6 +604,7 @@ def run(preset_name = "default"):
 
     pygame.quit()
     
+    print("json saving")
     DATA = {}
     
     DATA["HEIGHT"] = HEIGHT
@@ -614,6 +640,7 @@ def run(preset_name = "default"):
     with open(os.path.join(SCRIPT_PATH, "maps", preset_name + ".json"), 'w') as FILE:
         json.dump(DATA, FILE, indent=4)
 
+    print("json saving completed")
 if __name__ == "__main__":
     run()
     
