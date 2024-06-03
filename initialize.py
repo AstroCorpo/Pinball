@@ -1,7 +1,7 @@
 print("running whole initialize.py")
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
-os.environ['SDL_AUDIODRIVER'] = 'dummy'
+# os.environ['SDL_AUDIODRIVER'] = 'dummy'
 
 from menu import run_menu
 import pygame

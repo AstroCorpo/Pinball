@@ -581,7 +581,6 @@ walls.append(create_wall(start_pos=symmetry((position_left_2[0], position_left_2
 walls.append(create_wall(start_pos = (position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3), end_pos=(position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20), widt=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
 walls.append(create_wall(start_pos = symmetry((position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3)), end_pos=symmetry((position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20)), widt=WALL_WIDTH*0.65, color=WHITE, elasticity=2*ELASTICITY))
 
-# all kinds of floor
 
 blockade, blockade_shape = summon_blockade()
 
@@ -589,7 +588,7 @@ blockade, blockade_shape = summon_blockade()
 
 TARGET_HEIGHT = WALL_WIDTH*(3/2)
 INITIAL_HEIGHT = height - TARGET_HEIGHT
-
+# POINTER
 create_ball(position=(width - WALL_WIDTH//2, INITIAL_HEIGHT), r = WALL_WIDTH // 4, color=rand_color(), static = True, elasticity = 0, add = True, type = "p", second_pos = (width - WALL_WIDTH//2, WALL_WIDTH*(3/2)))
 
 
@@ -617,14 +616,6 @@ base_right_flipper_body, base_right_flipper_shape = create_flipper(2*BALL_RADIUS
 for _,shape in walls:
     shape.filter = pymunk.ShapeFilter(mask=pymunk.ShapeFilter.ALL_MASKS() & ~0x2)  # Wyłączenie maski flipperów
 
-obstacle_color = rand_color()
-
-
-# static_1 = create_wall(start_pos=(base_width // 2, height // 2), end_pos=(base_width // 2, height // 3), color=obstacle_color, widt=WALL_WIDTH, friction=FRICTION, elasticity=1.5 * ELASTICITY, static=True)
-# # print("# OBSTACLE",end = " ")
-# static_2 = create_ball(r=2 * BALL_RADIUS, position=(base_width // 3, height // 4), static=True, mass=None, color=obstacle_color, elasticity=1.5 * ELASTICITY)
-# # print("# OBSTACLE",end = " ")
-# static_3 = create_ball(r=2 * BALL_RADIUS, position=(2 * base_width // 3, height // 4), static=True, mass=None, color=obstacle_color, elasticity=1.5 * ELASTICITY)
 # Rejestracja funkcji obsługi zdarzeń kolizji
 handler = space.add_collision_handler(1, 2)
 handler.begin = increase_points
@@ -645,9 +636,6 @@ left_flipper_pressed = False
 base_flipper_pressed = False
 
 target_angle = np.pi / 3
-
-
-
 
 max_energy = LAUNCH_ENERGY
 energy_stored = 0

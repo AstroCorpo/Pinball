@@ -2,9 +2,7 @@ print("running whole main.py")
 import os
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 os.environ['SDL_AUDIODRIVER'] = 'dummy'
-SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
-LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 import random
 import pymunk
 import numpy as np
@@ -15,27 +13,77 @@ from copy import deepcopy
 import json
 import pause_menu as pause
 
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+SOUND_PATH = os.path.join(SCRIPT_PATH, "sounds")
+LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-def create_ball(r, position, static = False, mass = None, color = rand_color(), elast = 0.5, object_colors = None, space = None) :
-    
-    ball = None
-    if static : ball = pymunk.Body(body_type=pymunk.Body.STATIC)
-    else : ball = pymunk.Body()
-    ball.position = position
-    radius = r
-    ball_shape = pymunk.Circle(ball, radius)
-    if mass is not None :
-        ball_shape.mass = mass
-    else :
-        ball_shape.mass = ball_shape.area/20
-    ball_shape.elasticity = elast
-    object_colors[ball_shape] = color
-    space.add(ball, ball_shape)
-    return (ball,ball_shape), object_colors, space
+def create_ball(r, position, static = False, mass = None, color = rand_color(), elast = 0.5, collision_sound_file = None, action_sound_file = None, space = None) :
+    return Ball(r = r, position = position, static = static, mass = mass, color = color, elast = elast, collision_sound_file = collision_sound_file, action_sound_file = action_sound_file, space = space)
 
+class Ball :
+    def __init__(self, r, position, static = False, mass = None, color = rand_color(), elast = 0.5, collision_sound_file = None, action_sound_file = None, space = None) :
+        body = None
+        if static : body = pymunk.Body(body_type=pymunk.Body.STATIC)
+        else : body = pymunk.Body()
+        body.position = position
+        shape = pymunk.Circle(body, r)
+        if mass is not None :
+            shape.mass = mass
+        else :
+            shape.mass = shape.area/20
+        shape.elasticity = elast
+        self.color = color
+        
+        self.body = body
+        self.shape = shape
+        self.shape.data = self
+        
+        self.space = space
+        self.add()
+        
+        self.collision_sound = None
+        if collision_sound_file is not None :
+            self.collision_sound = pygame.mixer.Sound(os.path.join(SOUND_PATH, collision_sound_file))
+        
+        self.action_sound = None
+        if action_sound_file is not None :
+            self.action_sound = pygame.mixer.Sound(os.path.join(SOUND_PATH, action_sound_file))
+        
+    def add_to_space(self, space = None) :
+        if space is None : space = self.space
+        space.add(self.body, self.shape)
+    
+    def destroy(self) :
+        self.space.remove(self.body)
+        self.space.remove(self.shape)
+        
+    def draw(self, screen, rainbow_mode = False) :
+        color = self.color
+        if rainbow_mode : color = rand_color()
+        pos = self.body.position
+        radius = self.shape.radius
+        pygame.draw.circle(screen, color, (int(pos.x), int(pos.y)), int(radius), 0)
+        
+    def play_collision_sound(self) :
+        sound = self.collision_sound
+        if sound is not None :
+            sound.play()
+
+    def play_action_sound(self) :
+        sound = self.action_sound
+        if sound is not None :
+            sound.play()
+
+    def action(self, energy_stored) :
+        self.body.apply_impulse_at_local_point((0, -1_000*energy_stored))
+        self.play_action_sound()
+        
+        
+
+        
 def create_wall(start_pos, end_pos, color = rand_color(), width = 10, frict = 0.5, elast = 0.5, static = True, object_colors = None, space = None) :
     w = width // 2
     a_x, a_y = start_pos
@@ -88,6 +136,7 @@ def create_triangle(points, color, static = True, elast = 0.5, object_colors = N
     object_colors[shape] = color
     
     return (body, shape), object_colors, space
+
 
 def create_flipper(length, angle, position, side, color, elast, object_colors = None, space = None) :
     
@@ -148,7 +197,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
     
     OBSTACLES = []
     for arguments in config["OBSTACLES"] :
-        data, object_colors, space = create_ball(*arguments, object_colors, space)
+        data = create_ball(*arguments, space)
         OBSTACLES.append(data)
         field = circle_field(arguments[0])
         field_max = max(field_max, field)
@@ -159,7 +208,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         
     BALLS = []
     for arguments in config["BALLS"] :
-        data, object_colors, space = create_ball(*arguments, object_colors, space)
+        data, space = create_ball(*arguments, object_colors, space)
         BALLS.append(data)
         
     WALLS = []
@@ -344,7 +393,7 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
                     left_flipper_pressed = False
                 elif event.key == pygame.K_SPACE:
                     if at_start() :
-                        BALL.apply_impulse_at_local_point((0, -1_000*energy_stored))
+                        BALL.action(energy_stored)
                     space_pressed = False
                     display_fire = False
                 elif event.key == pygame.K_c:
@@ -455,9 +504,9 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         # Rysowanie obiektów
         for body in space.bodies:
             for shape in body.shapes:
-                if isinstance(shape, pymunk.Circle):
-                    draw_circle(body, shape)
-                elif isinstance(shape, pymunk.Poly):
+                shape.data.draw()
+                
+                if isinstance(shape, pymunk.Poly):
                     draw_polygon(body, shape)
 
                 # Check for collisions with the ball
@@ -508,6 +557,5 @@ def run(preset="fancy", player_name = "Unknown", screen = None) :
         pygame.quit()
 
 if __name__ == "__main__":
-    pygame.init()
-    run()
-    
+    from initialize import main_run
+    main_run()

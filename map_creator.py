@@ -11,17 +11,16 @@ import json
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 SOUND_PATH = os.path.join(SCRIPT_PATH, "sounds")
-LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 
-# Definicja kolorów
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-BLACK = (0, 0, 0)
 POINTS = 0
 
 VOLUME = 0.5
+
+# Set up constants
+BALLS = []
+WALLS = []
+POLYS = []
+FLIPPERS = []
 
 BALL_COLLISION_TYPE = 1
 OBSTACLE_COLLISTION_TYPE = 2
@@ -106,6 +105,7 @@ class Ball(Object):
         self.shape.collision_type = BALL_COLLISION_TYPE
         if add :
             self.shape.collision_type = OBSTACLE_COLLISTION_TYPE
+            BALLS.append((r, position, static, mass, color, game_points, elast, collision_sound_file))
         
         self.summon()
 
@@ -135,6 +135,7 @@ class Poly(Object):
         self.shape.data = self
         if addition :
             self.summon()
+            POLYS.append((points, position, mass, moment, color, game_points, frict, elast, static, collision_sound_file))
         
     def draw(self, screen, rainbow_mode = False) :
         color = self.color
@@ -160,6 +161,8 @@ class Wall(Poly):
 
         super().__init__(points = points, color=color, game_points = game_points, frict=frict, elast=elast, static=static, collision_sound_file=collision_sound_file, space=space)
         self.summon()
+        if add :
+            WALLS.append((start_pos, end_pos, color, game_points, width, frict, elast, static, collision_sound_file))
 
 class Flipper(Poly):
     global FLIPPERS
@@ -176,6 +179,7 @@ class Flipper(Poly):
         self.body.position = position
         self.shape.filter = pymunk.ShapeFilter(categories=0x2)
         self.summon()
+        FLIPPERS.append((length, angle, position, side, color, game_points, elast))
 
 def ball_collision_handler(arbiter, space, data):
     other_shape = arbiter.shapes[1]
@@ -186,55 +190,144 @@ def poly_collision_handler(arbiter, space, data):
     return False
 
 
-def run(preset="fancy", player_name = "Unknown", screen = None):
+def run(preset_name = "default"):
     global POINTS, WALLS, FLIPPERS, BALLS, POLYS
-    
-    print("RUNNING WITH PRESET", preset)
+    WIDTH, HEIGHT = 500, 900
+    ELASTICITY = 0.7
+    BALL_RADIUS = 15
+    NO_BALLS = 3
+    FRICTION = 0.5
+    WALL_WIDTH = 20
+    # Definicja kolorów
+    WHITE = (255, 255, 255)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    BLUE = (0, 0, 255)
+    BLACK = (0, 0, 0)
+    FLIPPER_LENGTH = 60
+    POINTS = 0
+    LAUNCH_ENERGY = 75
+    MINIMAL_ENERGY = 53
+    TUNNEL_SIZE = 2.2*BALL_RADIUS
+    TARGET_ANGLE = np.pi/3
+    REACTION_TIME = 0.75
+    BASE_WIDTH = WIDTH
+    GRAVITY = (0, 981)
+    WIDTH = int(round(WIDTH + WALL_WIDTH + 2.2 * BALL_RADIUS))
+    breaking_point = (BASE_WIDTH - WALL_WIDTH//2,2 * WALL_WIDTH + BALL_RADIUS * 3)
 
-    with open(os.path.join(SCRIPT_PATH, "maps", preset + ".json"), 'r') as file :
-        config = json.load(file)
-        
-    HEIGHT = config["HEIGHT"]
-    BALL_RADIUS = config["BALL_RADIUS"]
-    NO_BALLS = config["NO_BALLS"]
-    WALL_WIDTH = config["WALL_WIDTH"]
-    TARGET_HEIGHT = config["TARGET_HEIGHT"]
-    TARGET_ANGLE = config["TARGET_ANGLE"]
-    REACTION_TIME = config["REACTION_TIME"]
-    BASE_WIDTH = config["BASE_WIDTH"]
-    WIDTH = config["WIDTH"]
-    TUNNEL_SIZE = config["TUNNEL_SIZE"]
-    BALL_POSITION = config["BALL_POSITION"]
-    INITIAL_HEIGHT = HEIGHT - TARGET_HEIGHT
+    BALL_POSITION = (WIDTH - WALL_WIDTH - 1.1 * BALL_RADIUS, HEIGHT - WALL_WIDTH - 1.5 * BALL_RADIUS)
+
+    FLIPPER_ANGLE = -np.pi/12
+    FLIPPER_X = np.abs(FLIPPER_LENGTH * np.cos(FLIPPER_ANGLE))
+    FLIPPER_Y = np.abs(FLIPPER_LENGTH * np.sin(FLIPPER_ANGLE))
     
     
+    
+    def symmetry(point) :
+        if isinstance(point, list) :
+            points = []
+            for poin in point :
+                points.append((BASE_WIDTH - poin[0], poin[1]))
+            return points
+        return BASE_WIDTH - point[0], point[1]
+
+    def baricenter(points) :
+        a, b = 0,0
+        for c,d in points :
+            a += c
+            b += d
+        return (a/len(points), b/(len(points)))
+
+    def shortest(point, points) :
+        dist = float('inf')
+        for poin in points :
+            dist = min(dist,distance_points(point, poin))
+        return dist
+    
+    pygame.init()
     pygame.mixer.music.set_volume(0.2)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
     space = pymunk.Space()
-    space.gravity = config["GRAVITY"]
+    space.gravity = GRAVITY
 
 
     BALL_START = create_sound('ball_start.wav')
     FLIPPER_MOVE = create_sound('flipper_move.wav', percentage = 0.5)
 
-    for PARAMS in config["WALLS"] :
-        Wall(*PARAMS, add = True, space = space)
-        
-    for PARAMS in config["BALLS"] :
-        Ball(*PARAMS, add = True, space = space)
-        
-    for PARAMS in config["POLYS"] :
-        Poly(*PARAMS, addition = True, space = space)
-
-    flippers = []
-    for PARAMS in config["FLIPPERS"] :
-        flippers.append(Flipper(*PARAMS, space = space))
-
-    BALL = Ball(*config["BALL_PARAMS"], add = False, space = space)
-    POINTER = Ball(*config["POINTER_PARAMS"], add = False, space = space)
-    BLOCKADE = Wall(*config["BLOCKADE_PARAMS"], add = False, space = space)
+    wall_color = rand_color()
+    # Left flipper position
+    position_left = (BASE_WIDTH // 2 - 2 * BALL_RADIUS - FLIPPER_X, 0.95 * HEIGHT - FLIPPER_Y)
+    # right flipper position
+    position_right = symmetry(position_left)
     
+    # WALL args
+    # start_pos, end_pos, color, game_points, width, frict, elast, static, collision_sound_file, add, space
+    Wall(start_pos = (0, WALL_WIDTH//2), end_pos = (WIDTH, WALL_WIDTH//2), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (WALL_WIDTH//2, 0), end_pos = (WALL_WIDTH//2, HEIGHT), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (WIDTH - WALL_WIDTH//2, 0), end_pos = (WIDTH - WALL_WIDTH//2, HEIGHT), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (BASE_WIDTH - WALL_WIDTH//2, breaking_point[1]), end_pos = (BASE_WIDTH - WALL_WIDTH//2, HEIGHT), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (BASE_WIDTH, HEIGHT - WALL_WIDTH//2), end_pos = (WIDTH, HEIGHT - WALL_WIDTH//2), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    # Poly args
+    # points, position, mass, moment, color, game_points, frict, elast, static, collision_sound_file, addition = True, space
+    poin = [(0, HEIGHT), ((BASE_WIDTH // 2) - BALL_RADIUS, HEIGHT), (0, HEIGHT - 3*BALL_RADIUS)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    Poly(points = symmetry(poin), position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    
+    leng = 100
+    position_left_2 = (position_left[0] - np.cos(FLIPPER_ANGLE)*leng, position_left[1] + np.sin(FLIPPER_ANGLE)*leng)
+    position_right_2 = symmetry(position_left_2)
+    Wall(start_pos = position_left, end_pos = position_left_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = position_right, end_pos = position_right_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    
+    s_p = position_left_2[0], position_left_2[1] + 5
+    e_p = position_left_2[0], position_left_2[1] - 1.5*leng
+    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    
+    s_p = position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3
+    e_p = position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20
+    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    
+    
+    flipper_color = rand_color()
+    # Flipper args
+    # length, angle, position, side, color, game_points, elast
+    # flippers must be in table for proper demo
+    flippers = []
+    flippers.append(Flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_right, 'right', flipper_color, space = space))
+    flippers.append(Flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_left, 'left', flipper_color, space = space))
+
+    # Ball args
+    # r, position, static, mass, color, game_points, elast, collision_sound_file, add
+    ball_color = rand_color()
+    BALL_PARAMS = (BALL_RADIUS, BALL_POSITION, False, None, ball_color, 0, ELASTICITY, None)
+    BALL = Ball(*BALL_PARAMS, add = False, space = space)
+
+
+    TARGET_HEIGHT = WALL_WIDTH*(3/2)
+    INITIAL_HEIGHT = HEIGHT - TARGET_HEIGHT
+    
+    POINTER_PARAMS = (WALL_WIDTH//4, (WIDTH - WALL_WIDTH//2, INITIAL_HEIGHT), True, None, ball_color, 0, ELASTICITY, None)
+    
+    POINTER = Ball(*POINTER_PARAMS, add = False, space = space)
+    
+    BLOCKADE_PARAMS = ((BASE_WIDTH - WALL_WIDTH//2, 0), breaking_point, wall_color, 0, WALL_WIDTH, FRICTION, ELASTICITY, True, "wall_hit.wav")
+    BLOCKADE = Wall(*BLOCKADE_PARAMS, add = False, space = space)
+    BLOCKADE.destroy()
+
+    obstacle_color = rand_color()
+
+    # Obstacles
+    Wall(start_pos = (BASE_WIDTH // 2, HEIGHT // 3), end_pos = (BASE_WIDTH // 2, 2 * HEIGHT // 3), color = obstacle_color, game_points = 200, width = WALL_WIDTH, frict = FRICTION, elast = 2*ELASTICITY, static = True, collision_sound_file = "bell.wav", space = space)
+    
+    poin = (BASE_WIDTH // 3, HEIGHT // 4)
+    Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", space = space)
+    Ball(position = symmetry(poin), r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", space = space)
     
     handler = space.add_collision_handler(BALL_COLLISION_TYPE, POLY_COLLISION_TYPE)
     handler.begin = ball_collision_handler
@@ -314,8 +407,8 @@ def run(preset="fancy", player_name = "Unknown", screen = None):
 
     # max_energy = config["LAUNCH_ENERGY"]
     # min_energy = config["MINIMAL_ENERGY"]
-    max_energy = config["LAUNCH_ENERGY"]
-    min_energy = config["MINIMAL_ENERGY"]
+    max_energy = LAUNCH_ENERGY
+    min_energy = MINIMAL_ENERGY
     energy_stored = 0
     energy_direction = 1
     time_passed = 0
@@ -483,31 +576,44 @@ def run(preset="fancy", player_name = "Unknown", screen = None):
             draw_text(screen, "FIRE!", (WIDTH//2, HEIGHT//2), rand_color(), font_size=80)
 
         pygame.display.flip()
-        
-    if removed == NO_BALLS :
-        print()
-        print("avg_frametime", avg_time)
-        print("avg_fps", round(avg_fps))
-        print("POINTS:", POINTS)
-        
-        with open(LEADERBOARD_PATH, 'r') as file :
-            leaderboard = json.load(file)
-            
-        leaderboard["PREVIOUS_PLAYER"] = player_name
 
-        if player_name in leaderboard["SCORES"] :
-            leaderboard["SCORES"][player_name] = max(leaderboard["SCORES"][player_name], POINTS)
-        else :
-            leaderboard["SCORES"][player_name] = POINTS
-            
-        with open(LEADERBOARD_PATH, 'w') as FILE:
-            json.dump(leaderboard, FILE, indent=4)
-
-        menu.run_menu()
-    else :
-        pygame.quit()
+    pygame.quit()
+    
+    DATA = {}
+    
+    DATA["HEIGHT"] = HEIGHT
+    DATA["ELASTICITY"] = ELASTICITY
+    DATA["BALL_RADIUS"] = BALL_RADIUS
+    DATA["NO_BALLS"] = NO_BALLS
+    DATA["WALL_WIDTH"] = WALL_WIDTH
+    DATA["FLIPPER_LENGTH"] = FLIPPER_LENGTH
+    DATA["LAUNCH_ENERGY"] = LAUNCH_ENERGY
+    DATA["MINIMAL_ENERGY"] =  MINIMAL_ENERGY
+    DATA["TUNNEL_SIZE"] = TUNNEL_SIZE
+    DATA["REACTION_TIME"] = REACTION_TIME
+    DATA["BASE_WIDTH"] = BASE_WIDTH
+    DATA["WIDTH"] = WIDTH
+    DATA["BREAKING_POINT"] = breaking_point
+    DATA["FLIPPER_ANGLE"] = FLIPPER_ANGLE
+    DATA["FLIPPER_X"] = FLIPPER_X
+    DATA["FLIPPER_Y"] = FLIPPER_Y
+    DATA["BALL_POSITION"] = BALL_POSITION
+    DATA["GRAVITY"] = space.gravity
+    DATA["TARGET_HEIGHT"] = TARGET_HEIGHT
+    DATA["TARGET_ANGLE"] = TARGET_ANGLE
+    DATA["WALLS"] = WALLS
+    DATA["BALLS"] = BALLS
+    DATA["FLIPPERS"] = FLIPPERS
+    DATA["POLYS"] = POLYS
+    DATA["POINTER_PARAMS"] = POINTER_PARAMS
+    DATA["BALL_PARAMS"] = BALL_PARAMS
+    DATA["BLOCKADE_PARAMS"] = BLOCKADE_PARAMS
+    DATA["BALL_POSITION"] = BALL_POSITION
+    
+    
+    with open(os.path.join(SCRIPT_PATH, "maps", preset_name + ".json"), 'w') as FILE:
+        json.dump(DATA, FILE, indent=4)
 
 if __name__ == "__main__":
-    from initialize import main_run
-    main_run()
+    run()
     
