@@ -196,9 +196,9 @@ class Flipper(Poly):
         FLIPPERS.append((length, angle, position, side, color, game_points, elast))
 
 
-def run(preset_name = "default"):
+def run(preset_name = "third"):
     global POINTS, WALLS, FLIPPERS, BALLS, POLYS
-    WIDTH, HEIGHT = 500, 900
+    WIDTH, HEIGHT = 800, 1440
     ELASTICITY = 0.7
     BALL_RADIUS = 15
     NO_BALLS = 3
@@ -264,29 +264,125 @@ def run(preset_name = "default"):
     Wall(start_pos = (BASE_WIDTH, HEIGHT - WALL_WIDTH//2), end_pos = (WIDTH, HEIGHT - WALL_WIDTH//2), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
     Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
     Wall(start_pos = (WIDTH - 2.5*WALL_WIDTH, 0), end_pos = (WIDTH, 2.5*WALL_WIDTH), color = wall_color, game_points = 0, width = WALL_WIDTH, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    
-    # Poly args
-    # points, position, mass, moment, color, game_points, frict, elast, static, collision_sound_file, addition = True, space
     poin = [(0, HEIGHT), ((BASE_WIDTH // 2) - BALL_RADIUS, HEIGHT), (0, HEIGHT - 3*BALL_RADIUS)]
     Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
     Poly(points = symmetry(poin), position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
-    
-    leng = 100
-    position_left_2 = (position_left[0] - np.cos(FLIPPER_ANGLE)*leng, position_left[1] + np.sin(FLIPPER_ANGLE)*leng)
+
+    poin = [(WALL_WIDTH, 6*HEIGHT // 12),
+            (6*WALL_WIDTH, 5.5*HEIGHT // 12),
+            (WALL_WIDTH, 5*HEIGHT // 12)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = symmetry(poin)
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+
+    poin = [(WALL_WIDTH, 9*HEIGHT // 12),
+            (2*WALL_WIDTH, 8.5*HEIGHT // 12),
+            (WALL_WIDTH, 8*HEIGHT // 12)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = symmetry(poin)
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+
+    # START Left Castle
+    # Left Tower
+    poin = [(WALL_WIDTH, 3.25*HEIGHT // 12),
+            (2*WALL_WIDTH, 3.25*HEIGHT // 12),
+            (WALL_WIDTH, 3*HEIGHT // 12)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = [(1 * WALL_WIDTH, 4.25 * HEIGHT // 12),
+            (1 * WALL_WIDTH, 4.5 * HEIGHT // 12),
+            (2 * WALL_WIDTH, 4.25 * HEIGHT // 12)]
+    Poly(points=poin, position=None, mass=None, moment=None, color=wall_color, game_points=0, frict=FRICTION,
+         elast=ELASTICITY, static=True, collision_sound_file="wall_hit.wav", addition=True, space=space)
+    # Right Tower
+    poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*HEIGHT // 12),
+            (4*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*HEIGHT // 12),
+            (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3*HEIGHT // 12)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*HEIGHT // 12),
+            (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.75*HEIGHT // 12),
+            (4*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*HEIGHT // 12)]
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    # Castle Walls
+    Wall(start_pos=(3*WALL_WIDTH + 2.25*BALL_RADIUS, 4.5*HEIGHT//12), end_pos=(3*WALL_WIDTH + 2.25*BALL_RADIUS, 3.25 * HEIGHT // 12), color = wall_color, game_points = 0, width=2* WALL_WIDTH, frict = FRICTION, elast=ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=(1*WALL_WIDTH, 4.25*HEIGHT//12), end_pos=(1*WALL_WIDTH, 3.25 * HEIGHT // 12), color = wall_color, game_points = 0, width=2* WALL_WIDTH, frict = FRICTION, elast=ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    # END Left Castle
+
+    # START Right Castle
+    # Left Tower
+    poin = [(WALL_WIDTH, 3.25*HEIGHT // 12),
+            (2*WALL_WIDTH, 3.25*HEIGHT // 12),
+            (WALL_WIDTH, 3*HEIGHT // 12)]
+    poin = symmetry(poin)
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = [(1 * WALL_WIDTH, 4.25 * HEIGHT // 12),
+            (1 * WALL_WIDTH, 4.5 * HEIGHT // 12),
+            (2 * WALL_WIDTH, 4.25 * HEIGHT // 12)]
+    poin = symmetry(poin)
+    Poly(points=poin, position=None, mass=None, moment=None, color=wall_color, game_points=0, frict=FRICTION,
+         elast=ELASTICITY, static=True, collision_sound_file="wall_hit.wav", addition=True, space=space)
+    # Right Tower
+    poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*HEIGHT // 12),
+            (4*WALL_WIDTH + 2.2*BALL_RADIUS, 3.25*HEIGHT // 12),
+            (3*WALL_WIDTH + 2.2*BALL_RADIUS, 3*HEIGHT // 12)]
+    poin = symmetry(poin)
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    poin = [(2*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*HEIGHT // 12),
+            (3*WALL_WIDTH + 2.2*BALL_RADIUS, 4.5*HEIGHT // 12),
+            (4*WALL_WIDTH + 2.2*BALL_RADIUS, 4.25*HEIGHT // 12)]
+    poin = symmetry(poin)
+    Poly(points = poin, position = None, mass = None, moment = None, color = wall_color, game_points = 0, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", addition = True, space = space)
+    # Castle Walls
+    Wall(start_pos=symmetry((3*WALL_WIDTH + 2.25*BALL_RADIUS, 4.25*HEIGHT//12)), end_pos=symmetry((3*WALL_WIDTH + 2.25*BALL_RADIUS, 3.25 * HEIGHT // 12)), color = wall_color, game_points = 0, width=2* WALL_WIDTH, frict = FRICTION, elast=ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=symmetry((1*WALL_WIDTH, 4.25*HEIGHT//12)), end_pos=symmetry((1*WALL_WIDTH, 3.25 * HEIGHT // 12)), color = wall_color, game_points = 0, width=2* WALL_WIDTH, frict = FRICTION, elast=ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    # END Right Castle
+
+    # START Basket
+    leng_w = 200
+    leng_h = 100
+
+    poin = [(BASE_WIDTH // 5 + 80, 10.75 * HEIGHT // 12 - 60),
+            (BASE_WIDTH // 5 + 80, 10.75 * HEIGHT // 12 - 20),
+            (BASE_WIDTH // 5, 10 * HEIGHT // 12 - 30)]
+    Poly(points=poin, position=None, mass=None, moment=None, color=wall_color, game_points=0, frict=FRICTION,
+         elast=ELASTICITY, static=True, collision_sound_file="wall_hit.wav", addition=True, space=space)
+    poin = symmetry(poin)
+    Poly(points=poin, position=None, mass=None, moment=None, color=wall_color, game_points=0, frict=FRICTION,
+         elast=ELASTICITY, static=True, collision_sound_file="wall_hit.wav", addition=True, space=space)
+
+    position_left_2 = (position_left[0] - np.cos(FLIPPER_ANGLE)*leng_w,
+                       position_left[1] + np.sin(FLIPPER_ANGLE)*leng_h)
     position_right_2 = symmetry(position_left_2)
-    Wall(start_pos = position_left, end_pos = position_left_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    Wall(start_pos = position_right, end_pos = position_right_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    
-    s_p = position_left_2[0], position_left_2[1] + 5
-    e_p = position_left_2[0], position_left_2[1] - 1.5*leng
-    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    
-    s_p = position_left_2[0] - 3, position_left_2[1] - 1.5*leng + 3
-    e_p = position_left_2[0] + 20, position_left_2[1] - 1.5*leng - 20
-    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
-    
+    Wall(start_pos = position_left, end_pos = position_left_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos = position_right, end_pos = position_right_2, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    s_p = (position_left_2[0],
+           position_left_2[1] + 5)
+    e_p = (position_left_2[0],
+           position_left_2[1] - 1.5*leng_h)
+    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65,
+         frict = FRICTION, elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    s_p = (position_left_2[0] - 30,
+           position_left_2[1] - 1.5*leng_w + 30)
+    e_p = (position_left_2[0],
+           position_left_2[1] - 1.5*leng_h)
+    Wall(start_pos = s_p, end_pos = e_p, color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    Wall(start_pos=symmetry(s_p), end_pos=symmetry(e_p), color = wall_color, game_points = 0, width = WALL_WIDTH*0.65, frict = FRICTION,
+         elast = ELASTICITY, static = True, collision_sound_file = "wall_hit.wav", space=space)
+    # END Basket
     
     flipper_color = rand_color()
     # Flipper args
@@ -295,6 +391,12 @@ def run(preset_name = "default"):
     flippers = []
     flippers.append(Flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_right, 'right', flipper_color, space = space))
     flippers.append(Flipper(FLIPPER_LENGTH, FLIPPER_ANGLE, position_left, 'left', flipper_color, space = space))
+    # Left flipper position
+    position_left = (6*WALL_WIDTH - 10, 5.5*HEIGHT // 12)
+    # right flipper position
+    position_right = symmetry(position_left)
+    flippers.append(Flipper(1.5*FLIPPER_LENGTH, FLIPPER_ANGLE, position_right, 'right', flipper_color, space = space))
+    flippers.append(Flipper(1.5*FLIPPER_LENGTH, FLIPPER_ANGLE, position_left, 'left', flipper_color, space = space))
 
     # Ball args
     # r, position, static, mass, color, game_points, elast, collision_sound_file, add
@@ -316,13 +418,19 @@ def run(preset_name = "default"):
 
     obstacle_color = rand_color()
 
-    Wall(start_pos = (BASE_WIDTH // 2, HEIGHT // 3), end_pos = (BASE_WIDTH // 2, 2 * HEIGHT // 3), color = obstacle_color, game_points = 200, width = WALL_WIDTH, frict = FRICTION, elast = 2*ELASTICITY, static = True, collision_sound_file = "bell.wav", space = space)
-    
-    poin = (BASE_WIDTH // 3, HEIGHT // 4)
-    effects_table = [("epilepsy", [50]), ("slow", (50, 0.5)), ("rainbow", [100])]
+    poin = (BASE_WIDTH // 3, 3 * HEIGHT // 4)
+    effects_table = [("slow", (50, 0.5))]
     Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
     Ball(position = symmetry(poin), r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
-    
+
+    poin = (BASE_WIDTH // 3, 1.75 * HEIGHT // 4)
+    effects_table = [("slow", (50, 0.5))]
+    Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
+    Ball(position = symmetry(poin), r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast= 2*ELASTICITY, game_points = 400, collision_sound_file = "bell.wav", effects = effects_table, space = space)
+
+    poin = (BASE_WIDTH // 2, HEIGHT // 4)
+    Ball(position = poin, r = 2*BALL_RADIUS, color = obstacle_color, static = True, elast = 2*ELASTICITY, game_points = 400, collision_sound_file="bell.wav", effects = effects_table, space = space)
+
     def ball_collision_handler(arbiter, space, data):
         other_shape = arbiter.shapes[1]
         other_shape.data.collision()

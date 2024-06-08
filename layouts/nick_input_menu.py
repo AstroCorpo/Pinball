@@ -5,7 +5,7 @@ from layouts.input import InputBox
 from layouts.tools import generate_image
 
 INPUTS = ["input"]
-BUTTONS = []
+BUTTONS = ["What's your name?"]
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
@@ -34,6 +34,12 @@ def generate_nick_input_menu_layout(actions, spacing=10):
     WIDTH = max(WIDTH, max_width)
 
     start = spacing
+
+    for name in BUTTONS:
+        img = layout[name]
+        img_width, img_height = img.get_width(), img.get_height()
+        layout[name] = Button(img, (WIDTH // 2) - (img_width // 2), start, action=actions.get(name))
+        start += img_height + spacing
 
     for name in INPUTS:
         layout[name] = InputBox(WIDTH // 2 - 100, start, action=actions.get("box"))

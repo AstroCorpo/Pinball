@@ -9,7 +9,7 @@ import json
 
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-WIDTH, HEIGHT = 620, 640
+WIDTH, HEIGHT = 800, 740
 BACKGROUND_COLOR = (52, 78, 91)
 screen = None
 
@@ -95,13 +95,17 @@ def run_map3():
         
     main.run("third",leaderboard["PREVIOUS_PLAYER"], screen)
 
-
+def scoreboard_menu():
+    import layouts.leaderboard
 
 def run_menu(type='main'):
     global screen
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
 
-    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": nick_input_menu, "options": options_menu})
+    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": nick_input_menu, "options": options_menu, "score": scoreboard_menu})
+
+    # from layouts.leaderboard import generate_scoreboard_layout
+    # LAYOUT = generate_scoreboard_layout(scores)
 
     flags = pygame.NOFRAME if type != 'main' else 0
 

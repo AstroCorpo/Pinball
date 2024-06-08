@@ -432,19 +432,6 @@ walls = []
 # # # print("# OBSTACLE",end = " ")
 # (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 
-# for i in range(3) :
-#     prev = center_poin
-#     for _ in range(10) :
-#         vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
-#         vect1 /= distance_points((0,0), vect1)
-#         vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
-#         radius = shortest_in_triangle(poin, vect1)
-#         # # print("# OBSTACLE",end = " ")
-#         (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-#         # # print("# OBSTACLE",end = " ")
-#         (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
-#         prev = vect1
-        
 # walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
 # walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
 
@@ -457,20 +444,6 @@ walls = []
 # (create_ball(position=center_poin, r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY, add =True, type = "o"))
 # # # print("# OBSTACLE",end = " ")
 # (create_ball(position=symmetry(center_poin), r = radius, color=BLUE, static = True, elasticity = 2*ELASTICITY,add =True, type = "o"))
-
-
-# for i in range(3) :
-#     prev = center_poin
-#     for _ in range(10) :
-#         vect1 = (poin[i][0] - prev[0], poin[i][1] - prev[1])
-#         vect1 /= distance_points((0,0), vect1)
-#         vect1 = (vect1[0]*radius + prev[0], vect1[1]*radius + prev[1])
-#         radius = shortest_in_triangle(poin, vect1)
-#         # # print("# OBSTACLE",end = " ")
-#         (create_ball(position=vect1, r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
-#         # # print("# OBSTACLE",end = " ")
-#         (create_ball(position=symmetry(vect1), r = radius, color=BLUE, static = True, elasticity = 0, add =True, type = "o"))
-#         prev = vect1
 
 # walls.append(create_triangle(poin, color = RED, elast = 2*ELASTICITY))
 # walls.append(create_triangle(symmetry(poin), color = RED, elast = 2*ELASTICITY))
