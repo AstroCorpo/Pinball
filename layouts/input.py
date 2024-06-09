@@ -11,12 +11,12 @@ COLOR_ACTIVE = pg.Color('dodgerblue2')
 class InputBox:
     def __init__(self, x, y, action=None, text=''):
         pg.font.init()
-        self.FONT = pg.font.SysFont("Comic Sans MS", 16)
+        self.FONT = pg.font.SysFont("Comic Sans MS", 50)
         self.backtext = "Here type your nickname!"
         self.color = COLOR_INACTIVE
         self.txt_surface = self.FONT.render(text, True, self.color)
         self.txt_surface = self.FONT.render(self.backtext, True, self.color)
-        self.rect = pg.Rect(x + 90, y, 200, 32)  # Shifted 90 pixels to the right
+        self.rect = pg.Rect(x - 110, y, 600, 200)  # Shifted 90 pixels to the right
         self.text = ''
         self.active = False
         self.action = action
@@ -81,5 +81,5 @@ class InputBox:
         self.rect.w = width
 
     def draw(self, screen):
-        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 55))
         pg.draw.rect(screen, self.color, self.rect, 2)

@@ -57,7 +57,7 @@ def options_menu():
 def nick_input_menu():
     global LAYOUT
     from layouts.nick_input_menu import generate_nick_input_menu_layout
-    new_layout = generate_nick_input_menu_layout({"box": selection_menu})
+    new_layout = generate_nick_input_menu_layout({"confirm": selection_menu})
     LAYOUT = new_layout
 
 def selection_menu():

@@ -111,9 +111,9 @@ class Ball(Object):
         
         self.effects = {}
         
-        self.effects["slow"] = [-1, 2]
-        self.effects["epilepsy"] = [-1]
-        self.effects["rainbow"] = [-1]
+        self.effects["slow"] = [-float('inf'), 2]
+        self.effects["epilepsy"] = [-float('inf')]
+        self.effects["rainbow"] = [-float('inf')]
         
         for effect in effects :
             print(effect[1])
