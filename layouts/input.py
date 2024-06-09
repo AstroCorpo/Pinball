@@ -16,11 +16,10 @@ class InputBox:
         self.color = COLOR_INACTIVE
         self.txt_surface = self.FONT.render(text, True, self.color)
         self.txt_surface = self.FONT.render(self.backtext, True, self.color)
-        self.rect = pg.Rect(x, y, 200, 32)  # Initial width and height
+        self.rect = pg.Rect(x + 90, y, 200, 32)  # Shifted 90 pixels to the right
         self.text = ''
         self.active = False
         self.action = action
-
 
     def handle_event(self, event, screen, BACKGROUND_COLOR):
         if event.type == pg.MOUSEBUTTONDOWN:
@@ -43,19 +42,35 @@ class InputBox:
                     with open(LEADERBOARD_PATH, 'w') as FILE:
                         json.dump(leaderboard, FILE, indent=4)
 
-                    screen.fill(BACKGROUND_COLOR)
+                    background_image = pg.image.load("layouts/images/background.jpg")
+
+                    background_image = pg.transform.scale(background_image, (800, 1000))
+
+                    screen.blit(background_image, (0, 0))
                     self.text = ''
                     self.action()
                 elif event.key == pg.K_BACKSPACE:
                     self.text = self.text[:-1]
-                    screen.fill(BACKGROUND_COLOR)
+                    background_image = pg.image.load("layouts/images/background.jpg")
+
+                    background_image = pg.transform.scale(background_image, (800, 1000))
+
+                    screen.blit(background_image, (0, 0))
                 else:
-                    screen.fill(BACKGROUND_COLOR)
+                    background_image = pg.image.load("layouts/images/background.jpg")
+
+                    background_image = pg.transform.scale(background_image, (800, 1000))
+
+                    screen.blit(background_image, (0, 0))
                     self.text += event.unicode
                     self.draw(screen)
         if event.type == pg.KEYUP:
             if self.active:
-                screen.fill(BACKGROUND_COLOR)
+                background_image = pg.image.load("layouts/images/background.jpg")
+
+                background_image = pg.transform.scale(background_image, (800, 1000))
+
+                screen.blit(background_image, (0, 0))
                 if len(self.text) == 0:
                     self.txt_surface = self.FONT.render(self.backtext, True, self.color)
                 if len(self.text) > 0:

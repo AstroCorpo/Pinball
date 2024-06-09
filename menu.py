@@ -9,7 +9,7 @@ import json
 
 RUNNING = True
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
-WIDTH, HEIGHT = 800, 740
+WIDTH, HEIGHT = 800, 1000
 BACKGROUND_COLOR = (52, 78, 91)
 screen = None
 
@@ -120,7 +120,13 @@ def run_menu(type='main'):
 
     pygame.display.set_caption("Flipper Main Menu")
 
-    screen.fill(BACKGROUND_COLOR)
+    background_image = pygame.image.load("layouts/images/background.jpg")
+
+    # Dostosuj rozmiar obrazu do rozmiaru ekranu
+    background_image = pygame.transform.scale(background_image, (800, 1000))
+
+    # Wypełnij ekran za pomocą obrazu
+    screen.blit(background_image, (0, 0))
 
     while RUNNING:
         for event in pygame.event.get():

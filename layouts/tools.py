@@ -1,23 +1,34 @@
 import pygame
 
 
-def generate_image(name, margin=8):
-    font = pygame.font.SysFont(None, 24)
-    text = font.render(name.capitalize(), True, (255, 255, 255))
+def generate_image(name, width=600, height=200, margin=8, font_size=60):
+    font = pygame.font.SysFont(None, font_size)
+    lines = name.split('\n')  # Podziel tekst na linie
+    text_surfaces = []
+    for line in lines:
+        words = line.strip().split()
+        capitalized_words = [word.capitalize() for word in words]  # Kapitalizuj każde słowo
+        capitalized_line = ' '.join(capitalized_words)
+        text_surfaces.append(font.render(capitalized_line, True, (255, 255, 255)))
 
-    text_width, text_height = text.get_size()
+    max_width = max(surface.get_width() for surface in text_surfaces)
+    total_height = sum(surface.get_height() for surface in text_surfaces)
 
     total_margin = margin + 5
-    img_width = text_width + 2 * total_margin
-    img_height = text_height + 2 * total_margin
-    img = pygame.Surface((img_width, img_height))
-    img.fill((255, 255, 255))
-    inner_rect = pygame.Rect(5, 5, img_width - 10, img_height - 10)
-    pygame.draw.rect(img, (0, 0, 0), inner_rect)
-    text_rect = text.get_rect(center=(img_width // 2, img_height // 2))
-    img.blit(text, text_rect)
+    img_width = width
+    img_height = height
+    img = pygame.Surface((img_width, img_height), pygame.SRCALPHA)  # Ustaw SRCALPHA dla przezroczystości
+    pygame.draw.rect(img, (0, 0, 0, 100), img.get_rect(), border_radius=10)  # Dodaj gradient lub cień do tła
+
+    # Rysuj tekst w kolejnych wierszach
+    y_offset = (img_height - total_height) // 2
+    for surface in text_surfaces:
+        x_offset = (img_width - surface.get_width()) // 2
+        img.blit(surface, (x_offset, y_offset))
+        y_offset += surface.get_height()
 
     return img
+
 
 
 def generate_text_surface(text, font_size=24, color=(255, 255, 255)):

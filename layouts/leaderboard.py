@@ -7,19 +7,21 @@ pygame.init()
 
 # Ustawienia ekranu
 screen_width = 800
-screen_height = 740
+screen_height = 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Scoreboard")
 
 # Kolory
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GRAY = (200, 200, 200)
 
 # Czcionka
 font = pygame.font.Font(None, 36)
 header_font = pygame.font.Font(None, 48)
 
+# Ładowanie obrazka guzika
+button_image = pygame.image.load("layouts/images/back.png")
+button_image = pygame.transform.scale(button_image, (100, 50))
 
 # Funkcja wczytująca dane z pliku JSON
 def load_scores_from_json(filename):
@@ -29,10 +31,9 @@ def load_scores_from_json(filename):
         scores = data["SCORES"]
     return previous_player, scores
 
-
 # Funkcja rysująca tabelę wyników
 def draw_scoreboard(scores):
-    background_image = pygame.image.load("layouts/images/background.png")
+    background_image = pygame.image.load("layouts/images/background.jpg")
 
     # Dostosuj rozmiar obrazu do rozmiaru ekranu
     background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
@@ -83,17 +84,14 @@ def draw_scoreboard(scores):
     pygame.draw.line(screen, BLACK, (50, 50), (750, 50), 2)
     pygame.draw.line(screen, BLACK, (50, 100 + table_height + 20), (750, 100 + table_height + 20), 2)
 
-    # Rysowanie guzika
-    pygame.draw.rect(screen, GRAY, (screen_width // 2 - 50, 650, 100, 50))
-    button_text = font.render("HELLO", True, BLACK)
-    screen.blit(button_text, (screen_width // 2 - button_text.get_width() // 2, 665))
-
+    # Rysowanie guzika jako obraz
+    button_rect = button_image.get_rect(center=(screen_width // 2, 675))
+    screen.blit(button_image, button_rect)
 
 # Funkcja obsługująca kliknięcie przycisku
 def handle_button_click():
     from menu import run_menu
     run_menu()
-
 
 # Pętla gry
 running = True
@@ -103,8 +101,8 @@ while running:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            if screen_width // 2 - 50 <= mouse_pos[0] <= screen_width // 2 + 50 and 650 <= mouse_pos[1] <= 700:
-                handle_button_click()
+            handle_button_click()
+
 
     # Wczytaj dane z pliku JSON
     previous_player, scores = load_scores_from_json("layouts/leaderboard.json")

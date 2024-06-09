@@ -32,11 +32,11 @@ def generate_options_menu_layout(actions, spacing=10):
 
     WIDTH = max(WIDTH, max_width)
 
-    start = spacing
+    start = spacing + 90
     for name in BUTTONS:
         img = layout[name]
         img_width, img_height = img.get_width(), img.get_height()
-        layout[name] = Button(img, (WIDTH // 2) - (img_width // 2), start, action=actions.get(name))
+        layout[name] = Button(img, (WIDTH // 2) - (img_width // 2) + 90, start, action=actions.get(name))
         start += img_height + spacing
 
     return layout
