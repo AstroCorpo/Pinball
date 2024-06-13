@@ -5,7 +5,7 @@ from layouts.input import InputBox
 from layouts.tools import generate_image
 
 INPUTS = ["input"]
-BUTTONS = ["What's your name?"]
+BUTTONS = ["enter"]
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 BUTTONS2 = ["confirm"]
 

@@ -3,7 +3,6 @@ import pygame, os
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "layouts", "leaderboard.json")
 from layouts.main_menu import generate_main_menu_layout
-from layouts.nick_input_menu import generate_nick_input_menu_layout
 import main
 import json
 
@@ -12,8 +11,6 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 WIDTH, HEIGHT = 800, 1000
 BACKGROUND_COLOR = (52, 78, 91)
 screen = None
-
-from layouts.input import InputBox
 
 class Button:
     def __init__(self, image, x, y, action=None):
@@ -51,7 +48,7 @@ def back_to_main_menu():
 def options_menu():
     global LAYOUT
     from layouts.options_menu import generate_options_menu_layout
-    new_layout = generate_options_menu_layout({"menu": back_to_main_menu, "keys": key_bindings, "change_color": change_color})
+    new_layout = generate_options_menu_layout({"back": back_to_main_menu, "keys": key_bindings, "change_color": change_color})
     LAYOUT = new_layout
 
 def nick_input_menu():
@@ -96,16 +93,14 @@ def run_map3():
     main.run("third",leaderboard["PREVIOUS_PLAYER"], screen)
 
 def scoreboard_menu():
-    import layouts.leaderboard
+    from leaderboard import run_leaderboard
+    run_leaderboard()
 
 def run_menu(type='main'):
     global screen
     global RUNNING, WIDTH, HEIGHT, LAYOUT, BACKGROUND_COLOR
 
-    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": nick_input_menu, "options": options_menu, "score": scoreboard_menu})
-
-    # from layouts.leaderboard import generate_scoreboard_layout
-    # LAYOUT = generate_scoreboard_layout(scores)
+    LAYOUT = generate_main_menu_layout({"quit": quit_menu, "play": nick_input_menu, "options": options_menu, "leader": scoreboard_menu})
 
     flags = pygame.NOFRAME if type != 'main' else 0
 
@@ -120,12 +115,10 @@ def run_menu(type='main'):
 
     pygame.display.set_caption("Flipper Main Menu")
 
-    background_image = pygame.image.load("layouts/images/background.jpg")
+    background_image = pygame.image.load("layouts/images/background.png")
 
-    # Dostosuj rozmiar obrazu do rozmiaru ekranu
     background_image = pygame.transform.scale(background_image, (800, 1000))
 
-    # Wypełnij ekran za pomocą obrazu
     screen.blit(background_image, (0, 0))
 
     while RUNNING:

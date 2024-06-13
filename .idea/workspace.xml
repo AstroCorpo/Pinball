@@ -5,14 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="befb1765-b8f6-4455-8c0e-c77940cab87d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/layouts/images/confirm.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/layouts/images/enter.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/button.py" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/button.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/back.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/back.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/background.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/background.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/background.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/exit.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/keys.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/keys.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/leader.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/leader.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/options.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/options.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/play.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/play.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/images/quit.png" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/images/quit.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/layouts/input.py" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/input.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/layouts/leaderboard.json" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/leaderboard.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/leaderboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/leaderboard.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/main_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/main_menu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/layouts/nick_input_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/nick_input_menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/map_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/options_menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/options_menu.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/menu.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test5.py" beforeDir="false" afterPath="$PROJECT_DIR$/test5.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,37 +51,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.initialize.executor": "Run",
-    "Python.input.executor": "Run",
-    "Python.leaderboard.executor": "Run",
-    "Python.leaderboard_test.executor": "Run",
-    "Python.map_creator.executor": "Run",
-    "Python.menu.executor": "Run",
-    "Python.nick_input_menu.executor": "Run",
-    "Python.options_menu.executor": "Run",
-    "Python.test.executor": "Run",
-    "Python.test3.executor": "Run",
-    "Python.test5.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "new__project",
-    "last_opened_file_path": "C:/Users/pietr/OneDrive/Pulpit/Pinball/layouts/images",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.initialize.executor&quot;: &quot;Run&quot;,
+    &quot;Python.input.executor&quot;: &quot;Run&quot;,
+    &quot;Python.leaderboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.leaderboard_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.map_creator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.menu.executor&quot;: &quot;Run&quot;,
+    &quot;Python.nick_input_menu.executor&quot;: &quot;Run&quot;,
+    &quot;Python.options_menu.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test5.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;new__project&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/pietr/OneDrive/Pulpit/Search-Engine&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball\layouts\images" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
-      <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball\layouts" />
       <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball\layouts\images" />
+      <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball" />
+      <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball\layouts" />
       <recent name="C:\Users\pietr\OneDrive\Pulpit\Pinball\images" />
     </key>
   </component>
@@ -115,12 +128,26 @@
       <option name="presentableId" value="Default" />
       <updated>1717591629862</updated>
       <workItem from="1717591635232" duration="58000" />
-      <workItem from="1717879352030" duration="12154000" />
+      <workItem from="1717879352030" duration="12218000" />
+      <workItem from="1718035434589" duration="28000" />
+      <workItem from="1718302846291" duration="845000" />
+      <workItem from="1718318915180" duration="3236000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Pinball$leaderboard_test.coverage" NAME="leaderboard_test Coverage Results" MODIFIED="1717881241740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
@@ -132,7 +159,7 @@
     <SUITE FILE_PATH="coverage/Pinball$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1716297903404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$leaderboard.coverage" NAME="leaderboard Coverage Results" MODIFIED="1717882053533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
     <SUITE FILE_PATH="coverage/Pinball$options_menu.coverage" NAME="options_menu Coverage Results" MODIFIED="1716295756205" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
-    <SUITE FILE_PATH="coverage/Pinball$menu.coverage" NAME="menu Coverage Results" MODIFIED="1717948283481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Pinball$menu.coverage" NAME="menu Coverage Results" MODIFIED="1718322149119" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$test.coverage" NAME="test Coverage Results" MODIFIED="1717429006600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

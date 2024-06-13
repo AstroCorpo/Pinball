@@ -5,8 +5,9 @@ import pygame as pg
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 LEADERBOARD_PATH = os.path.join(SCRIPT_PATH, "leaderboard.json")
 
-COLOR_INACTIVE = pg.Color('lightskyblue3')
+COLOR_INACTIVE = pg.Color('black')
 COLOR_ACTIVE = pg.Color('dodgerblue2')
+INPUT_BACKGROUND_COLOR = pg.Color('white')  # White background color for the input box
 
 class InputBox:
     def __init__(self, x, y, action=None, text=''):
@@ -15,8 +16,7 @@ class InputBox:
         self.backtext = "Here type your nickname!"
         self.color = COLOR_INACTIVE
         self.txt_surface = self.FONT.render(text, True, self.color)
-        self.txt_surface = self.FONT.render(self.backtext, True, self.color)
-        self.rect = pg.Rect(x - 110, y, 600, 200)  # Shifted 90 pixels to the right
+        self.rect = pg.Rect(x - 110, y + 80, 600, 200)
         self.text = ''
         self.active = False
         self.action = action
@@ -42,44 +42,30 @@ class InputBox:
                     with open(LEADERBOARD_PATH, 'w') as FILE:
                         json.dump(leaderboard, FILE, indent=4)
 
-                    background_image = pg.image.load("layouts/images/background.jpg")
-
+                    background_image = pg.image.load("layouts/images/background.png")
                     background_image = pg.transform.scale(background_image, (800, 1000))
-
                     screen.blit(background_image, (0, 0))
                     self.text = ''
-                    self.action()
+                    if self.action:
+                        self.action()
                 elif event.key == pg.K_BACKSPACE:
                     self.text = self.text[:-1]
-                    background_image = pg.image.load("layouts/images/background.jpg")
-
-                    background_image = pg.transform.scale(background_image, (800, 1000))
-
-                    screen.blit(background_image, (0, 0))
                 else:
-                    background_image = pg.image.load("layouts/images/background.jpg")
-
-                    background_image = pg.transform.scale(background_image, (800, 1000))
-
-                    screen.blit(background_image, (0, 0))
                     self.text += event.unicode
-                    self.draw(screen)
-        if event.type == pg.KEYUP:
-            if self.active:
-                background_image = pg.image.load("layouts/images/background.jpg")
 
-                background_image = pg.transform.scale(background_image, (800, 1000))
-
-                screen.blit(background_image, (0, 0))
-                if len(self.text) == 0:
-                    self.txt_surface = self.FONT.render(self.backtext, True, self.color)
-                if len(self.text) > 0:
-                    self.txt_surface = self.FONT.render(self.text, True, self.color)
+        if event.type == pg.KEYUP and self.active:
+            self.txt_surface = self.FONT.render(self.backtext if len(self.text) == 0 else self.text, True, self.color)
 
     def update(self):
         width = max(200, self.txt_surface.get_width() + 10)
         self.rect.w = width
 
     def draw(self, screen):
-        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 55))
-        pg.draw.rect(screen, self.color, self.rect, 2)
+        # Fill the input box with white background
+        pg.draw.rect(screen, INPUT_BACKGROUND_COLOR, self.rect, border_radius=10)
+        # Calculate position to center the text
+        text_rect = self.txt_surface.get_rect(center=self.rect.center)
+        # Draw the text surface
+        screen.blit(self.txt_surface, (text_rect.x, text_rect.y))
+        # Draw the border of the input box
+        pg.draw.rect(screen, self.color, self.rect, 2, border_radius=10)

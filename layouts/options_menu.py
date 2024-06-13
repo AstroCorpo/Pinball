@@ -4,7 +4,7 @@ from layouts.button import Button
 from layouts.tools import generate_image
 
 
-BUTTONS = ["menu", "change_color", "keys"]
+BUTTONS = ["back", "keys"]
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 

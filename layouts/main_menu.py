@@ -4,7 +4,7 @@ from layouts.button import Button
 from layouts.tools import generate_image
 
 
-BUTTONS = ["play", "options", "score", "quit"]
+BUTTONS = ["play", "options", "leader", "quit"]
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
