@@ -115,7 +115,7 @@ def run_menu(type='main'):
 
     pygame.display.set_caption("Flipper Main Menu")
 
-    background_image = pygame.image.load("layouts/images/background.png")
+    background_image = pygame.image.load(os.path.join(SCRIPT_PATH, "layouts/images/background.png"))
 
     background_image = pygame.transform.scale(background_image, (800, 1000))
 

@@ -9,9 +9,12 @@ Python Project
 |             	| Plansza typu sandbox (tylko 	| prezentacja   	| fizyki i zachowania piłki)          	| ✅ 	|
 | Spotkanie 4 	| Przeszkody                  	| ✅             	| Ogólne reakcje między obiektami     	| ✅ 	|
 | Spotkanie 5 	| Naliczanie punktów, zasady  	| ✅             	| Menu                                	| ✅ 	|
-|             	| Oprawa Graficzna, kilka     	| plansz,       	| tryby gry                           	| ❌ 	|
-| Spotkanie 6 	| Dodatkowe przeszkody opcjon 	| alne, uspraw  	| nione przeszkody bonusowe           	| ❌ 	|
-| Spotkanie 7 	| Usprawnienia i ogólna optym 	| alizacja (Imp 	| lementacjawydajniejszych algorytmów 	| ❌ 	|
+|             	| Oprawa Graficzna, kilka     	| plansz,       	| tryby gry                           	| ✅ 	|
+| Spotkanie 6 	| Dodatkowe przeszkody opcjon 	| alne, uspraw  	| nione przeszkody bonusowe           	| ✅ 	|
+| Spotkanie 7 	| Usprawnienia i ogólna optym 	| alizacja (Imp 	| lementacjawydajniejszych algorytmów 	| ✅ 	|
+
+
+W przypadku tylko jednego znaku na końcu linii, oznacza to, że ta część projektu była wspólna
 
 
 # Reminders

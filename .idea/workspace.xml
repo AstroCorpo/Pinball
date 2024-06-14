@@ -5,12 +5,70 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="befb1765-b8f6-4455-8c0e-c77940cab87d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/layouts/images/map1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/layouts/images/map2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/layouts/images/map3.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/map_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/map_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Back  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Continue  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Controls  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Exit  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Load  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Menu  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/New Game  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Options  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Play col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Quit  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Resume  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Settings  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Colored Large Buttons/Start  col_Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Large Buttons/Load Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Large Buttons/New game Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Large Buttons/Settings Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Large Buttons/Start Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Large Buttons/Large Buttons/keys.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Audio col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Back col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Down col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Home col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Info col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Music col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Next col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/On Off col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Pause col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Play col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Questionmark col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Return col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Settings col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/Up col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/V col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Colored Square Buttons/X col_Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Audio Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Back Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Down Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Home Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Info Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Music Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Next Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/On Off Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Pause Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Play Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Questionmark Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Settings Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/Up Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/V Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Square Buttons/Square Buttons/X Square Button.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/globals.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/layouts/leaderboard.json" beforeDir="false" afterPath="$PROJECT_DIR$/layouts/leaderboard.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_v1.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_v2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/maps/default.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/maps/fancy.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/maps/third.json" beforeDir="false" afterPath="$PROJECT_DIR$/maps/third.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/menu.py" beforeDir="false" afterPath="$PROJECT_DIR$/menu.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tempCodeRunnerFile.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test4.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test5.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +176,7 @@
       <workItem from="1718035434589" duration="28000" />
       <workItem from="1718302846291" duration="845000" />
       <workItem from="1718318915180" duration="3410000" />
-      <workItem from="1718351765871" duration="982000" />
+      <workItem from="1718351765871" duration="3172000" />
     </task>
     <servers />
   </component>
@@ -138,7 +196,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Pinball$leaderboard_test.coverage" NAME="leaderboard_test Coverage Results" MODIFIED="1717881241740" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
-    <SUITE FILE_PATH="coverage/Pinball$map_creator.coverage" NAME="map_creator Coverage Results" MODIFIED="1718359933365" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Pinball$map_creator.coverage" NAME="map_creator Coverage Results" MODIFIED="1718363402892" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$nick_input_menu.coverage" NAME="nick_input_menu Coverage Results" MODIFIED="1716299534182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
     <SUITE FILE_PATH="coverage/Pinball$initialize.coverage" NAME="initialize Coverage Results" MODIFIED="1717879367081" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$test5.coverage" NAME="test5 Coverage Results" MODIFIED="1717947186716" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -146,7 +204,7 @@
     <SUITE FILE_PATH="coverage/Pinball$test3.coverage" NAME="test3 Coverage Results" MODIFIED="1716297903404" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$leaderboard.coverage" NAME="leaderboard Coverage Results" MODIFIED="1717882053533" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
     <SUITE FILE_PATH="coverage/Pinball$options_menu.coverage" NAME="options_menu Coverage Results" MODIFIED="1716295756205" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/layouts" />
-    <SUITE FILE_PATH="coverage/Pinball$menu.coverage" NAME="menu Coverage Results" MODIFIED="1718359422016" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Pinball$menu.coverage" NAME="menu Coverage Results" MODIFIED="1718364333951" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Pinball$test.coverage" NAME="test Coverage Results" MODIFIED="1717429006600" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
